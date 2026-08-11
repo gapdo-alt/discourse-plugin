@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-class AddIdToIpWatchlistGroupDiscourseGroups < ActiveRecord::Migration[7.0]
+class AddIdToIpWatchlistGroupDiscourseGroups < ActiveRecord::Migration[7.2]
   def up
-    # Join table was created without a primary key; ActiveRecord needs one
-    # for destroy / find_or_create_by on the join model.
+    return unless table_exists?(:ip_watchlist_group_discourse_groups)
     return if column_exists?(:ip_watchlist_group_discourse_groups, :id)
 
+    # Older installs created this join table without a primary key.
     execute <<~SQL
       ALTER TABLE ip_watchlist_group_discourse_groups
       ADD COLUMN id BIGSERIAL PRIMARY KEY
@@ -13,6 +13,9 @@ class AddIdToIpWatchlistGroupDiscourseGroups < ActiveRecord::Migration[7.0]
   end
 
   def down
-    remove_column :ip_watchlist_group_discourse_groups, :id if column_exists?(:ip_watchlist_group_discourse_groups, :id)
+    return unless table_exists?(:ip_watchlist_group_discourse_groups)
+    return unless column_exists?(:ip_watchlist_group_discourse_groups, :id)
+
+    remove_column :ip_watchlist_group_discourse_groups, :id
   end
 end
