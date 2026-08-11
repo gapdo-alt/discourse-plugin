@@ -1,0 +1,97 @@
+<div class="snowball-page">
+  <div class="snowball-wrap">
+    <h1>{{i18n "snowball.verify_title"}}</h1>
+    <p class="snowball-muted">{{i18n "snowball.verify_desc"}}</p>
+
+    {{#if (eq this.step "start")}}
+      <div class="snowball-card">
+        <p class="snowball-muted">
+          {{i18n "snowball.current_user"}}
+          <strong>{{this.currentUser.username}}</strong>
+        </p>
+        <button
+          class="btn btn-primary snowball-btn"
+          type="button"
+          disabled={{this.loading}}
+          {{on "click" this.startChallenge}}
+        >
+          {{#if this.loading}}
+            {{i18n "snowball.loading"}}
+          {{else}}
+            {{i18n "snowball.start"}}
+          {{/if}}
+        </button>
+        {{#if this.errorMessage}}
+          <p class="snowball-error">{{this.errorMessage}}</p>
+        {{/if}}
+      </div>
+    {{/if}}
+
+    {{#if (eq this.step "quiz")}}
+      <div class="snowball-card">
+        <div class={{this.timerClass}}>{{this.timerLeft}}</div>
+
+        {{#each this.employeeIds as |id index|}}
+          <div class="snowball-q-row" data-snowball-row={{id}}>
+            <div class="snowball-q-id">{{format-employee-id-html id}}</div>
+            <label>{{i18n "snowball.surname"}}</label>
+            <input
+              type="text"
+              class="snowball-input"
+              data-snowball-input={{id}}
+              maxlength="1"
+              placeholder={{i18n "snowball.surname_placeholder"}}
+              value={{get this.answers id}}
+              disabled={{get this.resignedMap id}}
+              {{on "input" (fn this.updateAnswer id)}}
+              {{on "keydown" (fn this.answerKeydown id index)}}
+            />
+            <label class="snowball-checkbox">
+              <input
+                type="checkbox"
+                checked={{get this.resignedMap id}}
+                {{on "change" (fn this.setResigned id)}}
+              />
+              {{i18n "snowball.resigned"}}
+            </label>
+          </div>
+        {{/each}}
+
+        <button
+          class="btn btn-primary snowball-btn snowball-btn-submit"
+          type="button"
+          disabled={{not this.canSubmit}}
+          {{on "click" this.submitAnswers}}
+        >
+          {{#if this.loading}}
+            {{i18n "snowball.submitting"}}
+          {{else}}
+            {{i18n "snowball.submit"}}
+          {{/if}}
+        </button>
+
+        {{#if this.errorMessage}}
+          <p class="snowball-error">{{this.errorMessage}}</p>
+        {{/if}}
+      </div>
+    {{/if}}
+
+    {{#if (eq this.step "result")}}
+      <div class="snowball-card">
+        <div class="snowball-result {{if this.passed 'pass' 'fail'}}">
+          {{this.resultMessage}}
+        </div>
+        {{#if this.discoursePromoted}}
+          <p class="snowball-muted">{{i18n "snowball.promoted_hint"}}</p>
+        {{/if}}
+        <button
+          class="btn btn-default snowball-btn secondary"
+          type="button"
+          {{on "click" this.resetFlow}}
+        >
+          {{i18n "snowball.back"}}
+        </button>
+      </div>
+    {{/if}}
+  </div>
+</div>

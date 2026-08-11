@@ -1,0 +1,7 @@
+en:
+  site_settings:
+    snowball_enabled: "Enable Snowball employee verification"
+    snowball_api_url: "Snowball API base URL"
+    snowball_verified_group: "Group to join after verification"
+    snowball_trust_level: "Trust level after verification"
+    snowball_show_nav_link: "Show verification link in navigation"

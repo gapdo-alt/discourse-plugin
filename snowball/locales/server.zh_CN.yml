@@ -1,0 +1,15 @@
+zh_CN:
+  site_settings:
+    snowball_enabled: "启用 Snowball 员工验证"
+    snowball_api_url: "Snowball API 地址"
+    snowball_verified_group: "验证通过后加入的群组"
+    snowball_trust_level: "验证通过后的信任等级"
+    snowball_show_nav_link: "在导航菜单显示验证入口"
+
+en:
+  site_settings:
+    snowball_enabled: "Enable Snowball employee verification"
+    snowball_api_url: "Snowball API base URL"
+    snowball_verified_group: "Group to join after verification"
+    snowball_trust_level: "Trust level after verification"
+    snowball_show_nav_link: "Show verification link in navigation"

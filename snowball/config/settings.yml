@@ -1,0 +1,20 @@
+plugins:
+  snowball_enabled:
+    default: true
+    client: true
+  snowball_api_url:
+    default: "https://snowball-verify.pages.dev"
+    client: false
+  snowball_verified_group:
+    default: "verified-employees"
+    client: false
+    description: "验证通过后加入的群组名称"
+  snowball_trust_level:
+    default: 2
+    min: 0
+    max: 4
+    client: false
+    description: "验证通过后的信任等级（0 表示不调整）"
+  snowball_show_nav_link:
+    default: true
+    client: true
