@@ -38,6 +38,11 @@ export default RouteTemplate(
           @action={{fn @controller.switchTab "enforcement"}}
           @translatedLabel={{i18n "admin.plugins.ip_watchlist.enforcement_tab"}}
         />
+        <DButton
+          class={{if (eq @controller.activeTab "ip_groups") "btn-primary" "btn-default"}}
+          @action={{@controller.switchToIpGroups}}
+          @translatedLabel={{i18n "admin.plugins.ip_watchlist.ip_groups_tab"}}
+        />
       </div>
 
       {{#if (eq @controller.activeTab "watchlist")}}
@@ -189,6 +194,132 @@ export default RouteTemplate(
             {{i18n "admin.plugins.ip_watchlist.empty_enforcements"}}
           </p>
         {{/if}}
+      {{/if}}
+
+      {{#if (eq @controller.activeTab "ip_groups")}}
+        {{#if @controller.ipGroupsData}}
+          <div class="ip-watchlist-admin__toolbar">
+            <input
+              type="text"
+              value={{@controller.newIpGroupName}}
+              {{on "input" @controller.updateNewIpGroupName}}
+              placeholder={{i18n "admin.plugins.ip_watchlist.ip_group_name_placeholder"}}
+              class="ip-watchlist-admin__add-ip"
+            />
+            <DButton
+              class="btn-primary"
+              @action={{@controller.createIpGroup}}
+              @translatedLabel={{i18n "admin.plugins.ip_watchlist.create_ip_group"}}
+            />
+          </div>
+
+          {{#if @controller.ipGroupsData.ip_groups.length}}
+            {{#each @controller.ipGroupsData.ip_groups as |ipGroup|}}
+              <div class="ip-watchlist-admin__ip-group-card">
+                <div class="ip-watchlist-admin__ip-group-header">
+                  <h4>{{ipGroup.name}}</h4>
+                  <div class="ip-watchlist-admin__actions">
+                    <DButton
+                      class="btn-small btn-default"
+                      @action={{fn @controller.startEditIpGroup ipGroup}}
+                      @icon="pencil"
+                    />
+                    <DButton
+                      class="btn-small btn-danger"
+                      @icon="trash-can"
+                      @action={{fn @controller.deleteIpGroup ipGroup}}
+                    />
+                  </div>
+                </div>
+                <p>
+                  {{i18n "admin.plugins.ip_watchlist.linked_groups"}}:
+                  {{#if ipGroup.discourse_group_names.length}}
+                    {{ipGroup.discourse_group_names}}
+                  {{else}}
+                    —
+                  {{/if}}
+                </p>
+                <p>
+                  {{i18n "admin.plugins.ip_watchlist.members"}}
+                  ({{ipGroup.membership_count}}):
+                </p>
+                <div class="ip-watchlist-admin__ip-tags">
+                  {{#each ipGroup.member_ips as |ip|}}
+                    <span class="ip-watchlist-admin__ip-tag">
+                      {{ip}}
+                      <DButton
+                        class="btn-flat btn-small"
+                        @icon="xmark"
+                        @action={{fn @controller.removeIpFromGroup ipGroup ip}}
+                      />
+                    </span>
+                  {{/each}}
+                </div>
+                <div class="ip-watchlist-admin__toolbar" style="margin-top: 0.5rem;">
+                  <input
+                    type="text"
+                    value={{@controller.addIpToGroupIp}}
+                    {{on "input" @controller.updateAddIpToGroupIp}}
+                    placeholder={{i18n "admin.plugins.ip_watchlist.add_ip_placeholder"}}
+                    class="ip-watchlist-admin__add-ip"
+                  />
+                  <DButton
+                    class="btn-small btn-primary"
+                    @action={{fn @controller.addIpToGroup ipGroup}}
+                    @translatedLabel={{i18n "admin.plugins.ip_watchlist.add_ip_to_group"}}
+                  />
+                </div>
+              </div>
+            {{/each}}
+          {{else}}
+            <p class="ip-watchlist-admin__empty">
+              {{i18n "admin.plugins.ip_watchlist.empty_ip_groups"}}
+            </p>
+          {{/if}}
+        {{else}}
+          <p>{{i18n "loading"}}</p>
+        {{/if}}
+      {{/if}}
+
+      {{#if @controller.editingIpGroup}}
+        <div class="ip-watchlist-admin__modal-backdrop">
+          <div class="ip-watchlist-admin__modal">
+            <h3>{{i18n "admin.plugins.ip_watchlist.edit_ip_group"}}</h3>
+            <p>
+              <input
+                type="text"
+                value={{@controller.editIpGroupName}}
+                {{on "input" @controller.updateEditIpGroupName}}
+                class="ip-watchlist-admin__add-ip"
+              />
+            </p>
+            <p>{{i18n "admin.plugins.ip_watchlist.linked_groups"}}:</p>
+            <div class="ip-watchlist-admin__group-list">
+              {{#each @controller.ipGroupsData.discourse_groups as |dg|}}
+                <label class="ip-watchlist-admin__group-option">
+                  <input
+                    type="checkbox"
+                    checked={{includes @controller.editIpGroupDiscourseGroupIds dg.id}}
+                    {{on "change" (fn @controller.toggleEditIpGroupDiscourseGroup dg.id)}}
+                  />
+                  {{dg.name}}
+                </label>
+              {{/each}}
+            </div>
+            <div class="ip-watchlist-admin__modal-actions">
+              <DButton
+                class="btn-default"
+                @action={{@controller.cancelEditIpGroup}}
+                @label="cancel"
+              />
+              <DButton
+                class="btn-primary"
+                @action={{@controller.saveEditIpGroup}}
+                @translatedLabel={{i18n "admin.plugins.ip_watchlist.save"}}
+              />
+            </div>
+          </div>
+        </div>
       {{/if}}
 
       {{#if @controller.promoteEntry}}

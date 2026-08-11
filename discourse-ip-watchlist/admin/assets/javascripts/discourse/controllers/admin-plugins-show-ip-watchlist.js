@@ -212,4 +212,164 @@ export default class AdminPluginsShowIpWatchlistController extends Controller {
       ? Number(event.target.value)
       : null;
   }
+
+  // ── IP Groups ──────────────────────────────────────────
+
+  @tracked ipGroupsData = null;
+  @tracked newIpGroupName = "";
+  @tracked newIpGroupDiscourseGroupIds = [];
+  @tracked editingIpGroup = null;
+  @tracked editIpGroupName = "";
+  @tracked editIpGroupDiscourseGroupIds = [];
+  @tracked addIpToGroupIp = "";
+
+  @action
+  async loadIpGroups() {
+    try {
+      this.ipGroupsData = await ajax("/admin/plugins/ip-watchlist/ip-groups");
+    } catch (e) {
+      popupAjaxError(e);
+    }
+  }
+
+  @action
+  async switchToIpGroups() {
+    this.activeTab = "ip_groups";
+    await this.loadIpGroups();
+  }
+
+  @action
+  updateNewIpGroupName(event) {
+    this.newIpGroupName = event.target.value;
+  }
+
+  @action
+  toggleNewIpGroupDiscourseGroup(groupId, event) {
+    const id = Number(groupId);
+    if (event?.target?.checked) {
+      this.newIpGroupDiscourseGroupIds = [...this.newIpGroupDiscourseGroupIds, id];
+    } else {
+      this.newIpGroupDiscourseGroupIds = this.newIpGroupDiscourseGroupIds.filter((g) => g !== id);
+    }
+  }
+
+  @action
+  async createIpGroup() {
+    if (!this.newIpGroupName.trim()) {
+      return;
+    }
+    try {
+      await ajax("/admin/plugins/ip-watchlist/ip-groups", {
+        type: "POST",
+        data: {
+          name: this.newIpGroupName.trim(),
+          discourse_group_ids: this.newIpGroupDiscourseGroupIds,
+        },
+      });
+      this.newIpGroupName = "";
+      this.newIpGroupDiscourseGroupIds = [];
+      await this.loadIpGroups();
+    } catch (e) {
+      popupAjaxError(e);
+    }
+  }
+
+  @action
+  startEditIpGroup(ipGroup) {
+    this.editingIpGroup = ipGroup;
+    this.editIpGroupName = ipGroup.name;
+    this.editIpGroupDiscourseGroupIds = [...(ipGroup.discourse_group_ids || [])];
+  }
+
+  @action
+  cancelEditIpGroup() {
+    this.editingIpGroup = null;
+  }
+
+  @action
+  updateEditIpGroupName(event) {
+    this.editIpGroupName = event.target.value;
+  }
+
+  @action
+  toggleEditIpGroupDiscourseGroup(groupId, event) {
+    const id = Number(groupId);
+    if (event?.target?.checked) {
+      this.editIpGroupDiscourseGroupIds = [...this.editIpGroupDiscourseGroupIds, id];
+    } else {
+      this.editIpGroupDiscourseGroupIds = this.editIpGroupDiscourseGroupIds.filter((g) => g !== id);
+    }
+  }
+
+  @action
+  async saveEditIpGroup() {
+    if (!this.editingIpGroup) {
+      return;
+    }
+    try {
+      await ajax(`/admin/plugins/ip-watchlist/ip-groups/${this.editingIpGroup.id}`, {
+        type: "PUT",
+        data: {
+          name: this.editIpGroupName.trim(),
+          discourse_group_ids: this.editIpGroupDiscourseGroupIds,
+        },
+      });
+      this.editingIpGroup = null;
+      await this.loadIpGroups();
+    } catch (e) {
+      popupAjaxError(e);
+    }
+  }
+
+  @action
+  deleteIpGroup(ipGroup) {
+    this.dialog.deleteConfirm({
+      message: ipGroup.name,
+      didConfirm: async () => {
+        try {
+          await ajax(`/admin/plugins/ip-watchlist/ip-groups/${ipGroup.id}`, {
+            type: "DELETE",
+          });
+          await this.loadIpGroups();
+        } catch (e) {
+          popupAjaxError(e);
+        }
+      },
+    });
+  }
+
+  @action
+  updateAddIpToGroupIp(event) {
+    this.addIpToGroupIp = event.target.value;
+  }
+
+  @action
+  async addIpToGroup(ipGroup) {
+    if (!this.addIpToGroupIp.trim()) {
+      return;
+    }
+    try {
+      await ajax(`/admin/plugins/ip-watchlist/ip-groups/${ipGroup.id}/add-ip`, {
+        type: "POST",
+        data: { ip_address: this.addIpToGroupIp.trim() },
+      });
+      this.addIpToGroupIp = "";
+      await this.loadIpGroups();
+    } catch (e) {
+      popupAjaxError(e);
+    }
+  }
+
+  @action
+  async removeIpFromGroup(ipGroup, ip) {
+    try {
+      await ajax(`/admin/plugins/ip-watchlist/ip-groups/${ipGroup.id}/remove-ip`, {
+        type: "DELETE",
+        data: { ip_address: ip },
+      });
+      await this.loadIpGroups();
+    } catch (e) {
+      popupAjaxError(e);
+    }
+  }
 }

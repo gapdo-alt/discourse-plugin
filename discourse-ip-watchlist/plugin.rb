@@ -26,8 +26,12 @@ require_relative "lib/ip_watchlist/application_controller_extension"
 after_initialize do
   require_relative "app/models/ip_watchlist_entry"
   require_relative "app/models/ip_watchlist_enforcement"
+  require_relative "app/models/ip_watchlist_group"
+  require_relative "app/models/ip_watchlist_group_membership"
+  require_relative "app/models/ip_watchlist_group_discourse_group"
   require_relative "app/serializers/ip_watchlist_entry_serializer"
   require_relative "app/serializers/ip_watchlist_enforcement_serializer"
+  require_relative "app/serializers/ip_watchlist_group_serializer"
   require_relative "app/controllers/ip_watchlist/admin_controller"
   require_relative "app/jobs/regular/evaluate_ip_watchlist"
   require_relative "app/jobs/scheduled/clean_ip_watchlist"
@@ -41,6 +45,18 @@ after_initialize do
     post "/enforcements" => "admin#create_enforcement"
     put "/enforcements/:id" => "admin#update_enforcement"
     delete "/enforcements/:id" => "admin#destroy_enforcement"
+
+    # IP Groups
+    get "/ip-groups" => "admin#ip_groups"
+    post "/ip-groups" => "admin#create_ip_group"
+    put "/ip-groups/:id" => "admin#update_ip_group"
+    delete "/ip-groups/:id" => "admin#destroy_ip_group"
+    post "/ip-groups/:id/add-ip" => "admin#add_ip_to_group"
+    delete "/ip-groups/:id/remove-ip" => "admin#remove_ip_from_group"
+
+    # Quick add from IP lookup popup
+    get "/ip-groups-for-ip" => "admin#ip_groups_for_ip"
+    post "/quick-add-ip" => "admin#quick_add_ip"
   end
 
   Discourse::Application.routes.append do

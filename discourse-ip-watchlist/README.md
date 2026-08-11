@@ -15,7 +15,13 @@
    - 晋升时：该 IP 上全部历史账号立刻入组
    - 之后从该 IP 登录的用户也会加入对应群组（只加不删）
 
-3. **其它**
+3. **IP 组**
+   - 自定义命名的 IP 组（如「华为云可疑」「办公室出口」）
+   - 每个 IP 组可关联一个或多个 Discourse 群组
+   - 将 IP 加入 IP 组后，该 IP 的历史及新登录用户自动加入关联群组
+   - 在 Discourse 管理后台的 IP 查询弹窗中，可一键把 IP 加入 IP 组
+
+4. **其它**
    - 仅管理员可访问
    - 观察记录可配置保留天数（已晋升 IP 不会被自动清理）
    - 观察库提供「同 IP 用户」管理链接
@@ -30,8 +36,9 @@ hooks:
     - exec:
         cd: $home
         cmd:
-          - git clone https://github.com/gapdo-alt/discourse-plugin.git /tmp/discourse-plugins-mono
-          - ln -sfn /tmp/discourse-plugins-mono/discourse-ip-watchlist $home/plugins/discourse-ip-watchlist
+          - rm -rf $home/discourse-plugins-mono
+          - git clone https://github.com/gapdo-alt/discourse-plugin.git $home/discourse-plugins-mono
+          - ln -sfn $home/discourse-plugins-mono/discourse-ip-watchlist $home/plugins/discourse-ip-watchlist
 ```
 
 重建容器后，在 **管理 → 插件 → IP Watchlist** 中启用并配置。

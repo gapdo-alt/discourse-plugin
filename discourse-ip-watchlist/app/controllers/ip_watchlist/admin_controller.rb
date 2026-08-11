@@ -153,5 +153,151 @@ module ::IpWatchlist
       enforcement.destroy!
       render json: success_json
     end
+
+    # ── IP Groups ──────────────────────────────────────────────
+
+    def ip_groups
+      groups =
+        IpWatchlistGroup
+          .includes(:discourse_group_links, :memberships)
+          .order(:name)
+
+      render_json_dump(
+        ip_groups:
+          ActiveModel::ArraySerializer.new(
+            groups,
+            each_serializer: IpWatchlistGroupSerializer,
+            root: false,
+          ),
+        discourse_groups:
+          Group.order(:name).limit(1000).pluck(:id, :name).map { |id, name| { id: id, name: name } },
+      )
+    end
+
+    def create_ip_group
+      name = params.require(:name).strip
+      discourse_group_ids = Array(params[:discourse_group_ids]).map(&:to_i).uniq
+
+      ip_group = IpWatchlistGroup.new(name: name, created_by: current_user)
+      ip_group.save!
+
+      sync_discourse_groups!(ip_group, discourse_group_ids)
+
+      render_json_dump(ip_group: IpWatchlistGroupSerializer.new(ip_group.reload, root: false))
+    end
+
+    def update_ip_group
+      ip_group = IpWatchlistGroup.find(params[:id])
+      ip_group.name = params[:name].strip if params[:name].present?
+      ip_group.save!
+
+      if params.key?(:discourse_group_ids)
+        discourse_group_ids = Array(params[:discourse_group_ids]).map(&:to_i).uniq
+        sync_discourse_groups!(ip_group, discourse_group_ids)
+
+        backfill_ip_group!(ip_group)
+      end
+
+      render_json_dump(ip_group: IpWatchlistGroupSerializer.new(ip_group.reload, root: false))
+    end
+
+    def destroy_ip_group
+      ip_group = IpWatchlistGroup.find(params[:id])
+      ip_group.destroy!
+      render json: success_json
+    end
+
+    def add_ip_to_group
+      ip_group = IpWatchlistGroup.find(params[:id])
+      ip = normalize_ip!(params.require(:ip_address))
+
+      membership =
+        ip_group.memberships.find_or_initialize_by(ip_address: ip)
+      membership.created_by_id ||= current_user.id
+      membership.save!
+
+      backfill_ip_for_group!(ip, ip_group)
+
+      render_json_dump(ip_group: IpWatchlistGroupSerializer.new(ip_group.reload, root: false))
+    end
+
+    def remove_ip_from_group
+      ip_group = IpWatchlistGroup.find(params[:id])
+      ip = normalize_ip!(params.require(:ip_address))
+
+      ip_group.memberships.where(ip_address: ip).destroy_all
+
+      render json: success_json
+    end
+
+    # Called from the IP lookup popup to list groups + membership status for an IP
+    def ip_groups_for_ip
+      ip = normalize_ip!(params.require(:ip_address))
+
+      all_groups = IpWatchlistGroup.includes(:discourse_group_links).order(:name)
+      member_group_ids =
+        IpWatchlistGroupMembership.where(ip_address: ip).pluck(:ip_watchlist_group_id)
+
+      render_json_dump(
+        ip_groups:
+          all_groups.map do |g|
+            {
+              id: g.id,
+              name: g.name,
+              is_member: member_group_ids.include?(g.id),
+              discourse_group_names: g.discourse_groups.pluck(:name),
+            }
+          end,
+      )
+    end
+
+    # Quick add IP to one or more IP groups from the IP lookup popup
+    def quick_add_ip
+      ip = normalize_ip!(params.require(:ip_address))
+      ip_group_ids = Array(params.require(:ip_group_ids)).map(&:to_i).uniq
+
+      ip_group_ids.each do |gid|
+        ip_group = IpWatchlistGroup.find(gid)
+        membership = ip_group.memberships.find_or_initialize_by(ip_address: ip)
+        membership.created_by_id ||= current_user.id
+        membership.save!
+        backfill_ip_for_group!(ip, ip_group)
+      end
+
+      render json: success_json
+    end
+
+    private
+
+    def sync_discourse_groups!(ip_group, discourse_group_ids)
+      ip_group.discourse_group_links.where.not(group_id: discourse_group_ids).destroy_all
+
+      discourse_group_ids.each do |gid|
+        next if Group.find_by(id: gid).blank?
+        ip_group.discourse_group_links.find_or_create_by!(group_id: gid)
+      end
+    end
+
+    def backfill_ip_group!(ip_group)
+      group_ids = ip_group.discourse_group_links.pluck(:group_id)
+      return if group_ids.blank?
+
+      ip_group.memberships.pluck(:ip_address).each do |ip|
+        IpWatchlist::GroupAssigner.backfill_ip!(ip_address: ip.to_s, group_ids: group_ids)
+      end
+    end
+
+    def backfill_ip_for_group!(ip, ip_group)
+      group_ids = ip_group.discourse_group_links.pluck(:group_id)
+      return if group_ids.blank?
+
+      IpWatchlist::GroupAssigner.backfill_ip!(ip_address: ip.to_s, group_ids: group_ids)
+    end
+
+    def normalize_ip!(raw)
+      ip = IpWatchlistEntry.normalize_ip(raw)
+      raise Discourse::InvalidParameters.new(:ip_address) if ip.blank?
+      ip
+    end
   end
 end

@@ -19,12 +19,30 @@ module ::IpWatchlist
     end
 
     def self.groups_for_ip(ip_address)
+      ip = normalize_ip(ip_address)
+      return Group.none if ip.blank?
+
+      # From direct enforcement rules
       group_ids =
         IpWatchlistEnforcement
           .enabled
-          .where(ip_address: normalize_ip(ip_address))
+          .where(ip_address: ip)
           .pluck(:group_id)
-      Group.where(id: group_ids)
+
+      # From IP group memberships → linked Discourse groups
+      ip_group_ids =
+        IpWatchlistGroupMembership
+          .where(ip_address: ip)
+          .pluck(:ip_watchlist_group_id)
+
+      if ip_group_ids.present?
+        group_ids |=
+          IpWatchlistGroupDiscourseGroup
+            .where(ip_watchlist_group_id: ip_group_ids)
+            .pluck(:group_id)
+      end
+
+      Group.where(id: group_ids.uniq)
     end
 
     def self.users_for_ip(ip_address)

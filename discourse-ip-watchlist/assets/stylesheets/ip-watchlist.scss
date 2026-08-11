@@ -86,4 +86,93 @@
     justify-content: flex-end;
     gap: 0.5rem;
   }
+
+  &__ip-group-card {
+    border: 1px solid var(--primary-low);
+    border-radius: 4px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  &__ip-group-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+
+  &__ip-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.5rem;
+  }
+
+  &__ip-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.15rem 0.5rem;
+    background: var(--primary-very-low);
+    border-radius: 3px;
+    font-size: 0.875em;
+    font-family: monospace;
+  }
+}
+
+.ip-watchlist-quick-add {
+  display: inline-block;
+  margin-left: 0.5rem;
+
+  &__backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1100;
+  }
+
+  &__modal {
+    background: var(--secondary);
+    color: var(--primary);
+    padding: 1.25rem;
+    border-radius: 4px;
+    width: min(28rem, 92vw);
+    max-height: 80vh;
+    overflow: auto;
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 1rem 0;
+    max-height: 20rem;
+    overflow: auto;
+  }
+
+  &__option {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  &__linked {
+    color: var(--primary-medium);
+    font-size: 0.875em;
+  }
+
+  &__already {
+    color: var(--success);
+    font-size: 0.8em;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
 }
