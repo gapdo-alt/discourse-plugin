@@ -17,16 +17,18 @@ hooks:
     - exec:
         cd: $home
         cmd:
-          - rm -rf /tmp/discourse-plugins-mono
-          - git clone https://github.com/gapdo-alt/discourse-plugin.git /tmp/discourse-plugins-mono
-          - ln -sfn /tmp/discourse-plugins-mono/discourse-ip-watchlist $home/plugins/discourse-ip-watchlist
-          - ln -sfn /tmp/discourse-plugins-mono/snowball $home/plugins/snowball
+          - rm -rf $home/discourse-plugins-mono
+          - git clone https://github.com/gapdo-alt/discourse-plugin.git $home/discourse-plugins-mono
+          - ln -sfn $home/discourse-plugins-mono/discourse-ip-watchlist $home/plugins/discourse-ip-watchlist
+          - ln -sfn $home/discourse-plugins-mono/snowball $home/plugins/snowball
 ```
+
+monorepo 克隆在 `$home/discourse-plugins-mono`（持久目录），再软链到 `$home/plugins/<插件名>` 供 Discourse 加载。
 
 若需指定分支：
 
 ```yml
-- git clone -b cursor/ip-group-membership-b098 https://github.com/gapdo-alt/discourse-plugin.git /tmp/discourse-plugins-mono
+- git clone -b cursor/ip-group-membership-b098 https://github.com/gapdo-alt/discourse-plugin.git $home/discourse-plugins-mono
 ```
 
 然后重建：

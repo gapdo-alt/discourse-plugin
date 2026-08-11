@@ -72,3 +72,5 @@ hooks:
 ```bash
 LOAD_PLUGINS=1 bin/rspec plugins/discourse-ip-watchlist/spec
 ```
+
+（需先将本目录软链到 Discourse 的 `plugins/discourse-ip-watchlist`。）
