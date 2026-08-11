@@ -58,3 +58,5 @@ zh_CN:
           quick_add_success: "IP 已成功加入组。"
           save: "保存"
           same_subnet_hint: "与组内成员在同一 /24 网段"
+          ip_group_status: "当前 IP 所属组"
+          not_in_any_ip_group: "未加入任何 IP 组"

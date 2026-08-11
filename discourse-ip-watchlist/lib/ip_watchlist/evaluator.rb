@@ -46,7 +46,9 @@ module ::IpWatchlist
     end
 
     def fetch_ip_info
-      DiscourseIpInfo.get(@ip_address, resolve_hostname: true) || {}
+      # Only reverse-DNS when hostname keywords are configured (can be slow).
+      resolve_hostname = SiteSetting.ip_watchlist_hostname_keywords_map.any?
+      DiscourseIpInfo.get(@ip_address, resolve_hostname: resolve_hostname) || {}
     rescue StandardError => e
       Rails.logger.warn("[IpWatchlist] DiscourseIpInfo failed for #{@ip_address}: #{e.message}")
       {}

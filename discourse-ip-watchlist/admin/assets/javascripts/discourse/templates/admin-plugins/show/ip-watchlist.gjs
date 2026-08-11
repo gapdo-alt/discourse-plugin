@@ -1,4 +1,4 @@
-import { concat, fn } from "@ember/helper";
+import { concat, fn, get } from "@ember/helper";
 import { on } from "@ember/modifier";
 import RouteTemplate from "ember-route-template";
 import DButton from "discourse/components/d-button";
@@ -212,6 +212,21 @@ export default RouteTemplate(
               @translatedLabel={{i18n "admin.plugins.ip_watchlist.create_ip_group"}}
             />
           </div>
+          {{#if @controller.ipGroupsData.discourse_groups.length}}
+            <div class="ip-watchlist-admin__group-list" style="margin-bottom: 1rem;">
+              <p>{{i18n "admin.plugins.ip_watchlist.linked_groups"}}（创建时可选）:</p>
+              {{#each @controller.ipGroupsData.discourse_groups as |dg|}}
+                <label class="ip-watchlist-admin__group-option">
+                  <input
+                    type="checkbox"
+                    checked={{includes @controller.newIpGroupDiscourseGroupIds dg.id}}
+                    {{on "change" (fn @controller.toggleNewIpGroupDiscourseGroup dg.id)}}
+                  />
+                  {{dg.name}}
+                </label>
+              {{/each}}
+            </div>
+          {{/if}}
 
           {{#if @controller.ipGroupsData.ip_groups.length}}
             {{#each @controller.ipGroupsData.ip_groups as |ipGroup|}}
@@ -258,8 +273,8 @@ export default RouteTemplate(
                 <div class="ip-watchlist-admin__toolbar" style="margin-top: 0.5rem;">
                   <input
                     type="text"
-                    value={{@controller.addIpToGroupIp}}
-                    {{on "input" @controller.updateAddIpToGroupIp}}
+                    value={{get @controller.addIpByGroupId ipGroup.id}}
+                    {{on "input" (fn @controller.updateAddIpForGroup ipGroup.id)}}
                     placeholder={{i18n "admin.plugins.ip_watchlist.add_ip_placeholder"}}
                     class="ip-watchlist-admin__add-ip"
                   />

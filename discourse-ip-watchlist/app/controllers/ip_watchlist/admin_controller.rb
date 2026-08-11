@@ -138,7 +138,8 @@ module ::IpWatchlist
 
       enforcement.save!
 
-      if enforcement.enabled? && enforcement.saved_change_to_enabled?
+      if enforcement.enabled? &&
+           (enforcement.saved_change_to_enabled? || enforcement.saved_change_to_group_id?)
         IpWatchlist::GroupAssigner.backfill_ip!(
           ip_address: enforcement.ip_address.to_s,
           group_ids: [enforcement.group_id],

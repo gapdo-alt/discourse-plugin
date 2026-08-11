@@ -6,14 +6,15 @@ import { on } from "@ember/modifier";
 import { fn } from "@ember/helper";
 import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
-import DButton from "discourse/ui-kit/d-button";
-import DModal from "discourse/components/d-modal";
+import DButton from "discourse/components/d-button";
 import { i18n } from "discourse-i18n";
 
+function includes(list, value) {
+  return (list || []).includes(value);
+}
+
 export default class IpWatchlistQuickAdd extends Component {
-  @service currentUser;
   @service toasts;
-  @service modal;
 
   @tracked showModal = false;
   @tracked ipGroups = [];
@@ -24,7 +25,7 @@ export default class IpWatchlistQuickAdd extends Component {
   @tracked preloaded = false;
 
   static shouldRender(outletArgs) {
-    return outletArgs?.model?.ip_address;
+    return !!outletArgs?.model?.ip_address;
   }
 
   get ip() {
@@ -44,13 +45,17 @@ export default class IpWatchlistQuickAdd extends Component {
       const result = await ajax("/admin/plugins/ip-watchlist/ip-groups-for-ip", {
         data: { ip_address: this.ip },
       });
-      const groups = result.ip_groups || [];
-      this.memberOfGroups = groups.filter((g) => g.is_member);
-      this.subnetGroups = groups.filter((g) => !g.is_member && g.has_same_subnet);
-      this.preloaded = true;
+      this.applyStatus(result.ip_groups || []);
     } catch {
       // silently fail on preload
     }
+  }
+
+  applyStatus(groups) {
+    this.ipGroups = groups;
+    this.memberOfGroups = groups.filter((g) => g.is_member);
+    this.subnetGroups = groups.filter((g) => !g.is_member && g.has_same_subnet);
+    this.preloaded = true;
   }
 
   @action
@@ -64,10 +69,9 @@ export default class IpWatchlistQuickAdd extends Component {
       const result = await ajax("/admin/plugins/ip-watchlist/ip-groups-for-ip", {
         data: { ip_address: this.ip },
       });
-      this.ipGroups = result.ip_groups || [];
-      this.selectedIds = this.ipGroups
-        .filter((g) => g.is_member)
-        .map((g) => g.id);
+      const groups = result.ip_groups || [];
+      this.applyStatus(groups);
+      this.selectedIds = groups.filter((g) => g.is_member).map((g) => g.id);
     } catch (e) {
       popupAjaxError(e);
     } finally {
@@ -113,6 +117,7 @@ export default class IpWatchlistQuickAdd extends Component {
         duration: "short",
       });
       this.showModal = false;
+      await this.preloadStatus();
     } catch (e) {
       popupAjaxError(e);
     }
@@ -120,6 +125,11 @@ export default class IpWatchlistQuickAdd extends Component {
 
   <template>
     <div class="ip-watchlist-quick-add">
+      <div class="ip-watchlist-quick-add__label">
+        {{i18n "admin.plugins.ip_watchlist.ip_group_status"}}
+        <code>{{this.ip}}</code>
+      </div>
+
       {{#if this.preloaded}}
         {{#if this.memberOfGroups.length}}
           <span class="ip-watchlist-quick-add__badges">
@@ -131,16 +141,27 @@ export default class IpWatchlistQuickAdd extends Component {
         {{#if this.subnetGroups.length}}
           <span class="ip-watchlist-quick-add__badges">
             {{#each this.subnetGroups as |g|}}
-              <span class="ip-watchlist-quick-add__badge --subnet" title="{{i18n "admin.plugins.ip_watchlist.same_subnet_hint"}}">
+              <span
+                class="ip-watchlist-quick-add__badge --subnet"
+                title={{i18n "admin.plugins.ip_watchlist.same_subnet_hint"}}
+              >
                 ⚠ {{g.name}}
               </span>
             {{/each}}
           </span>
         {{/if}}
+        {{#unless this.memberOfGroups.length}}
+          {{#unless this.subnetGroups.length}}
+            <span class="ip-watchlist-quick-add__none">
+              {{i18n "admin.plugins.ip_watchlist.not_in_any_ip_group"}}
+            </span>
+          {{/unless}}
+        {{/unless}}
       {{/if}}
+
       <DButton
         class="btn-default btn-small"
-        @icon="binoculars"
+        @icon="plus"
         @action={{this.openModal}}
         @translatedLabel={{i18n "admin.plugins.ip_watchlist.add_to_ip_group"}}
       />
@@ -159,7 +180,7 @@ export default class IpWatchlistQuickAdd extends Component {
                   <label class="ip-watchlist-quick-add__option">
                     <input
                       type="checkbox"
-                      checked={{g.is_member}}
+                      checked={{includes this.selectedIds g.id}}
                       disabled={{g.is_member}}
                       {{on "change" (fn this.toggleGroup g.id)}}
                     />

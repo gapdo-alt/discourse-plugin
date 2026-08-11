@@ -23,7 +23,7 @@ class CreateIpWatchlistGroups < ActiveRecord::Migration[7.0]
               name: "idx_ip_wl_group_memberships_unique"
     add_index :ip_watchlist_group_memberships, :ip_address
 
-    create_table :ip_watchlist_group_discourse_groups, id: false do |t|
+    create_table :ip_watchlist_group_discourse_groups do |t|
       t.integer :ip_watchlist_group_id, null: false
       t.integer :group_id, null: false
     end

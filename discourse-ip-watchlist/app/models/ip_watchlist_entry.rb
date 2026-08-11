@@ -21,7 +21,7 @@ class IpWatchlistEntry < ActiveRecord::Base
     entry.organization = organization if organization.present?
     entry.hostname = hostname if hostname.present?
     entry.referrer = referrer if referrer.present?
-    entry.hit_count = entry.hit_count.to_i + 1
+    entry.hit_count = entry.new_record? ? 1 : entry.hit_count.to_i + 1
     entry.first_seen_at ||= Time.zone.now
     entry.last_seen_at = Time.zone.now
     entry.save!
@@ -35,12 +35,17 @@ class IpWatchlistEntry < ActiveRecord::Base
     nil
   end
 
+  # Lightweight count for admin list (avoid scanning auth-token history).
   def related_user_count
-    IpWatchlist::GroupAssigner.users_for_ip(ip_address).count
+    ip = ip_address.to_s
+    return 0 if ip.blank?
+    User.real.where("ip_address = :ip OR registration_ip_address = :ip", ip: ip).count
   end
 
   def sample_user_id
-    IpWatchlist::GroupAssigner.users_for_ip(ip_address).limit(1).pick(:id)
+    ip = ip_address.to_s
+    return nil if ip.blank?
+    User.real.where("ip_address = :ip OR registration_ip_address = :ip", ip: ip).limit(1).pick(:id)
   end
 
   private

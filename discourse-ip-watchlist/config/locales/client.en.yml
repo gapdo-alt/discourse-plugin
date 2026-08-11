@@ -58,3 +58,5 @@ en:
           quick_add_success: "IP added to group(s) successfully."
           save: "Save"
           same_subnet_hint: "Same /24 subnet as group member"
+          ip_group_status: "IP Groups for"
+          not_in_any_ip_group: "Not in any IP group"

@@ -221,7 +221,7 @@ export default class AdminPluginsShowIpWatchlistController extends Controller {
   @tracked editingIpGroup = null;
   @tracked editIpGroupName = "";
   @tracked editIpGroupDiscourseGroupIds = [];
-  @tracked addIpToGroupIp = "";
+  @tracked addIpByGroupId = {};
 
   @action
   async loadIpGroups() {
@@ -339,21 +339,25 @@ export default class AdminPluginsShowIpWatchlistController extends Controller {
   }
 
   @action
-  updateAddIpToGroupIp(event) {
-    this.addIpToGroupIp = event.target.value;
+  updateAddIpForGroup(groupId, event) {
+    this.addIpByGroupId = {
+      ...this.addIpByGroupId,
+      [groupId]: event.target.value,
+    };
   }
 
   @action
   async addIpToGroup(ipGroup) {
-    if (!this.addIpToGroupIp.trim()) {
+    const ip = (this.addIpByGroupId[ipGroup.id] || "").trim();
+    if (!ip) {
       return;
     }
     try {
       await ajax(`/admin/plugins/ip-watchlist/ip-groups/${ipGroup.id}/add-ip`, {
         type: "POST",
-        data: { ip_address: this.addIpToGroupIp.trim() },
+        data: { ip_address: ip },
       });
-      this.addIpToGroupIp = "";
+      this.addIpByGroupId = { ...this.addIpByGroupId, [ipGroup.id]: "" };
       await this.loadIpGroups();
     } catch (e) {
       popupAjaxError(e);
