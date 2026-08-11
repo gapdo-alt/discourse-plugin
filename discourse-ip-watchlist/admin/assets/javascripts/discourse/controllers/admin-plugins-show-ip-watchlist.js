@@ -32,8 +32,8 @@ export default class AdminPluginsShowIpWatchlistController extends Controller {
   async refreshData() {
     try {
       const url = this.search
-        ? `/admin/plugins/ip-watchlist?q=${encodeURIComponent(this.search)}`
-        : "/admin/plugins/ip-watchlist";
+        ? `/admin/ip-watchlist?q=${encodeURIComponent(this.search)}`
+        : "/admin/ip-watchlist";
       this.model = await ajax(url);
     } catch (e) {
       popupAjaxError(e);
@@ -54,7 +54,7 @@ export default class AdminPluginsShowIpWatchlistController extends Controller {
     }
 
     try {
-      await ajax("/admin/plugins/ip-watchlist/entries", {
+      await ajax("/admin/ip-watchlist/entries", {
         type: "POST",
         data: { ip_address: this.newIp.trim() },
       });
@@ -75,7 +75,7 @@ export default class AdminPluginsShowIpWatchlistController extends Controller {
       message: entry.ip_address,
       didConfirm: async () => {
         try {
-          await ajax(`/admin/plugins/ip-watchlist/entries/${entry.id}`, {
+          await ajax(`/admin/ip-watchlist/entries/${entry.id}`, {
             type: "DELETE",
           });
           await this.refreshData();
@@ -119,7 +119,7 @@ export default class AdminPluginsShowIpWatchlistController extends Controller {
 
     try {
       await ajax(
-        `/admin/plugins/ip-watchlist/entries/${this.promoteEntry.id}/promote`,
+        `/admin/ip-watchlist/entries/${this.promoteEntry.id}/promote`,
         {
           type: "POST",
           data: { group_ids: this.selectedGroupIds },
@@ -140,7 +140,7 @@ export default class AdminPluginsShowIpWatchlistController extends Controller {
   @action
   async toggleEnforcement(row) {
     try {
-      await ajax(`/admin/plugins/ip-watchlist/enforcements/${row.id}`, {
+      await ajax(`/admin/ip-watchlist/enforcements/${row.id}`, {
         type: "PUT",
         data: { enabled: !row.enabled },
       });
@@ -156,7 +156,7 @@ export default class AdminPluginsShowIpWatchlistController extends Controller {
       message: `${row.ip_address} → ${row.group_name}`,
       didConfirm: async () => {
         try {
-          await ajax(`/admin/plugins/ip-watchlist/enforcements/${row.id}`, {
+          await ajax(`/admin/ip-watchlist/enforcements/${row.id}`, {
             type: "DELETE",
           });
           await this.refreshData();
@@ -175,7 +175,7 @@ export default class AdminPluginsShowIpWatchlistController extends Controller {
     }
 
     try {
-      await ajax("/admin/plugins/ip-watchlist/enforcements", {
+      await ajax("/admin/ip-watchlist/enforcements", {
         type: "POST",
         data: {
           ip_address: this.newEnforcementIp.trim(),
@@ -226,7 +226,7 @@ export default class AdminPluginsShowIpWatchlistController extends Controller {
   @action
   async loadIpGroups() {
     try {
-      this.ipGroupsData = await ajax("/admin/plugins/ip-watchlist/ip-groups");
+      this.ipGroupsData = await ajax("/admin/ip-watchlist/ip-groups");
     } catch (e) {
       popupAjaxError(e);
     }
@@ -259,7 +259,7 @@ export default class AdminPluginsShowIpWatchlistController extends Controller {
       return;
     }
     try {
-      await ajax("/admin/plugins/ip-watchlist/ip-groups", {
+      await ajax("/admin/ip-watchlist/ip-groups", {
         type: "POST",
         data: {
           name: this.newIpGroupName.trim(),
@@ -307,7 +307,7 @@ export default class AdminPluginsShowIpWatchlistController extends Controller {
       return;
     }
     try {
-      await ajax(`/admin/plugins/ip-watchlist/ip-groups/${this.editingIpGroup.id}`, {
+      await ajax(`/admin/ip-watchlist/ip-groups/${this.editingIpGroup.id}`, {
         type: "PUT",
         data: {
           name: this.editIpGroupName.trim(),
@@ -327,7 +327,7 @@ export default class AdminPluginsShowIpWatchlistController extends Controller {
       message: ipGroup.name,
       didConfirm: async () => {
         try {
-          await ajax(`/admin/plugins/ip-watchlist/ip-groups/${ipGroup.id}`, {
+          await ajax(`/admin/ip-watchlist/ip-groups/${ipGroup.id}`, {
             type: "DELETE",
           });
           await this.loadIpGroups();
@@ -353,7 +353,7 @@ export default class AdminPluginsShowIpWatchlistController extends Controller {
       return;
     }
     try {
-      await ajax(`/admin/plugins/ip-watchlist/ip-groups/${ipGroup.id}/add-ip`, {
+      await ajax(`/admin/ip-watchlist/ip-groups/${ipGroup.id}/add-ip`, {
         type: "POST",
         data: { ip_address: ip },
       });
@@ -367,7 +367,7 @@ export default class AdminPluginsShowIpWatchlistController extends Controller {
   @action
   async removeIpFromGroup(ipGroup, ip) {
     try {
-      await ajax(`/admin/plugins/ip-watchlist/ip-groups/${ipGroup.id}/remove-ip`, {
+      await ajax(`/admin/ip-watchlist/ip-groups/${ipGroup.id}/remove-ip`, {
         type: "DELETE",
         data: { ip_address: ip },
       });

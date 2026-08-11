@@ -1,6 +1,6 @@
 plugins:
   ip_watchlist_enabled:
-    default: false
+    default: true
     client: true
   ip_watchlist_org_keywords:
     default: "huawei|hw cloud|HUAWEI CLOUDS"

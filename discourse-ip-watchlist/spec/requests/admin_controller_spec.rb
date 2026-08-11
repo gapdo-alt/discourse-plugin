@@ -14,7 +14,7 @@ RSpec.describe IpWatchlist::AdminController do
   describe "#index" do
     it "is admin-only" do
       sign_in(Fabricate(:user))
-      get "/admin/plugins/ip-watchlist.json"
+      get "/admin/ip-watchlist.json"
       expect([403, 404]).to include(response.status)
     end
 
@@ -25,7 +25,7 @@ RSpec.describe IpWatchlist::AdminController do
         organization: "HUAWEI CLOUDS",
       )
 
-      get "/admin/plugins/ip-watchlist.json"
+      get "/admin/ip-watchlist.json"
       expect(response.status).to eq(200)
       expect(response.parsed_body["entries"].first["ip_address"]).to eq("203.0.113.9")
       expect(response.parsed_body["entries"].first["same_ip_admin_url"]).to include(
@@ -40,7 +40,7 @@ RSpec.describe IpWatchlist::AdminController do
       entry =
         IpWatchlistEntry.upsert_hit!(ip_address: "198.51.100.9", reason: "org_keyword")
 
-      post "/admin/plugins/ip-watchlist/entries/#{entry.id}/promote.json",
+      post "/admin/ip-watchlist/entries/#{entry.id}/promote.json",
            params: {
              group_ids: [group.id, group2.id],
            }

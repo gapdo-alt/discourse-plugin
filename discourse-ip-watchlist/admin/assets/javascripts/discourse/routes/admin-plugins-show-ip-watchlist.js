@@ -12,8 +12,8 @@ export default class AdminPluginsShowIpWatchlistRoute extends DiscourseRoute {
 
     const q = params?.q;
     const url = q
-      ? `/admin/plugins/ip-watchlist?q=${encodeURIComponent(q)}`
-      : "/admin/plugins/ip-watchlist";
+      ? `/admin/ip-watchlist?q=${encodeURIComponent(q)}`
+      : "/admin/ip-watchlist";
 
     return await ajax(url);
   }

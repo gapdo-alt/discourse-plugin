@@ -42,7 +42,7 @@ export default class IpWatchlistQuickAdd extends Component {
       return;
     }
     try {
-      const result = await ajax("/admin/plugins/ip-watchlist/ip-groups-for-ip", {
+      const result = await ajax("/admin/ip-watchlist/ip-groups-for-ip", {
         data: { ip_address: this.ip },
       });
       this.applyStatus(result.ip_groups || []);
@@ -66,7 +66,7 @@ export default class IpWatchlistQuickAdd extends Component {
     this.loading = true;
     this.showModal = true;
     try {
-      const result = await ajax("/admin/plugins/ip-watchlist/ip-groups-for-ip", {
+      const result = await ajax("/admin/ip-watchlist/ip-groups-for-ip", {
         data: { ip_address: this.ip },
       });
       const groups = result.ip_groups || [];
@@ -108,7 +108,7 @@ export default class IpWatchlistQuickAdd extends Component {
     }
 
     try {
-      await ajax("/admin/plugins/ip-watchlist/quick-add-ip", {
+      await ajax("/admin/ip-watchlist/quick-add-ip", {
         type: "POST",
         data: { ip_address: this.ip, ip_group_ids: newIds },
       });
