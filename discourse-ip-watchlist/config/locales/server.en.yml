@@ -1,0 +1,9 @@
+en:
+  site_settings:
+    ip_watchlist_enabled: "Enable IP watchlist observation and group enforcement"
+    ip_watchlist_org_keywords: "Organization keywords that add a login IP to the watchlist (case-insensitive substring match)"
+    ip_watchlist_hostname_keywords: "Hostname keywords that add a login IP to the watchlist (case-insensitive substring match)"
+    ip_watchlist_referrer_patterns: "Referrer wildcard patterns (use * as wildcard), e.g. *114.114.114.114*"
+    ip_watchlist_retention_days: "Delete watchlist entries older than this many days since last hit (0 = never auto-delete). Entries with enforcement rules are kept."
+  ip_watchlist:
+    title: "IP Watchlist"

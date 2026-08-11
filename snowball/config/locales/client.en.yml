@@ -1,0 +1,6 @@
+en:
+  admin_js:
+    admin:
+      plugins:
+        snowball:
+          title: "Snowball"

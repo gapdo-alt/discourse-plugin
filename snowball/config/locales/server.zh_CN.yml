@@ -1,0 +1,5 @@
+zh_CN:
+  site_settings:
+    snowball_enabled: "启用 Snowball 插件"
+  snowball:
+    title: "Snowball"
