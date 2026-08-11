@@ -2,15 +2,11 @@
 
 module ::IpWatchlist
   module ApplicationControllerExtension
-    extend ActiveSupport::Concern
-
-    prepended do
-      before_action :ip_watchlist_store_referrer
-    end
-
     def ip_watchlist_store_referrer
-      return unless SiteSetting.ip_watchlist_enabled
+      return unless defined?(SiteSetting) && SiteSetting.ip_watchlist_enabled
       RequestStore.store[:ip_watchlist_referrer] = request&.referer
+    rescue StandardError
+      # Never break a request because of referrer capture.
     end
   end
 end

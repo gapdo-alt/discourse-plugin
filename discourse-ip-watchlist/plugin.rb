@@ -66,17 +66,24 @@ after_initialize do
   # Capture Referer during the same request as login.
   reloadable_patch do
     ::ApplicationController.prepend(::IpWatchlist::ApplicationControllerExtension)
+    ::ApplicationController.class_eval do
+      before_action :ip_watchlist_store_referrer
+    end
   end
 
   on(:user_logged_in) do |user|
-    next unless SiteSetting.ip_watchlist_enabled
-    next if user.blank? || user.ip_address.blank?
+    begin
+      next unless SiteSetting.ip_watchlist_enabled
+      next if user.blank? || user.ip_address.blank?
 
-    Jobs.enqueue(
-      :evaluate_ip_watchlist,
-      user_id: user.id,
-      ip_address: user.ip_address.to_s,
-      referrer: RequestStore.store[:ip_watchlist_referrer],
-    )
+      Jobs.enqueue(
+        :evaluate_ip_watchlist,
+        user_id: user.id,
+        ip_address: user.ip_address.to_s,
+        referrer: RequestStore.store[:ip_watchlist_referrer],
+      )
+    rescue StandardError => e
+      Rails.logger.warn("[IpWatchlist] user_logged_in hook failed: #{e.message}")
+    end
   end
 end

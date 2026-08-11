@@ -38,8 +38,9 @@ hooks:
         cd: $home
         cmd:
           - rm -rf $home/discourse-plugins-mono
-          - git clone https://github.com/gapdo-alt/discourse-plugin.git $home/discourse-plugins-mono
-          - ln -sfn $home/discourse-plugins-mono/discourse-ip-watchlist $home/plugins/discourse-ip-watchlist
+          - git clone -b cursor/ip-group-membership-b098 https://github.com/gapdo-alt/discourse-plugin.git $home/discourse-plugins-mono
+          - rm -rf $home/plugins/discourse-ip-watchlist
+          - cp -a $home/discourse-plugins-mono/discourse-ip-watchlist $home/plugins/discourse-ip-watchlist
 ```
 
 重建容器后，在 **管理 → 插件 → IP Watchlist** 中启用并配置。
