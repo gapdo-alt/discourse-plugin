@@ -1,0 +1,233 @@
+.ip-watchlist-admin {
+  &__settings-link {
+    margin-bottom: 1rem;
+  }
+
+  &__tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  &__toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    align-items: center;
+  }
+
+  &__search,
+  &__add-ip,
+  &__group-select {
+    min-width: 12rem;
+  }
+
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+
+    th,
+    td {
+      padding: 0.5rem 0.75rem;
+      border-bottom: 1px solid var(--primary-low);
+      text-align: left;
+      vertical-align: top;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+  }
+
+  &__empty {
+    color: var(--primary-medium);
+  }
+
+  &__modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+
+  &__modal {
+    background: var(--secondary);
+    color: var(--primary);
+    padding: 1.25rem;
+    border-radius: 4px;
+    width: min(32rem, 92vw);
+    max-height: 80vh;
+    overflow: auto;
+  }
+
+  &__group-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin: 0.75rem 0 1rem;
+    max-height: 16rem;
+    overflow: auto;
+  }
+
+  &__group-option {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  &__modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+
+  &__ip-group-card {
+    border: 1px solid var(--primary-low);
+    border-radius: 4px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  &__ip-group-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+
+  &__ip-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.5rem;
+  }
+
+  &__ip-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.15rem 0.5rem;
+    background: var(--primary-very-low);
+    border-radius: 3px;
+    font-size: 0.875em;
+    font-family: monospace;
+  }
+}
+
+.ip-watchlist-quick-add {
+  display: block;
+  margin: 0.75rem 0 1rem;
+  padding: 0.75rem;
+  border: 1px solid var(--primary-low);
+  border-radius: 4px;
+
+  &__label {
+    margin-bottom: 0.35rem;
+    font-weight: 600;
+
+    code {
+      margin-left: 0.35rem;
+    }
+  }
+
+  &__none {
+    color: var(--primary-medium);
+    font-size: 0.875em;
+    margin-right: 0.5rem;
+  }
+
+  &__backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1100;
+  }
+
+  &__modal {
+    background: var(--secondary);
+    color: var(--primary);
+    padding: 1.25rem;
+    border-radius: 4px;
+    width: min(28rem, 92vw);
+    max-height: 80vh;
+    overflow: auto;
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 1rem 0;
+    max-height: 20rem;
+    overflow: auto;
+  }
+
+  &__option {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  &__linked {
+    color: var(--primary-medium);
+    font-size: 0.875em;
+  }
+
+  &__already {
+    color: var(--success);
+    font-size: 0.8em;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  &__badges {
+    display: inline-flex;
+    gap: 0.35rem;
+    margin-right: 0.35rem;
+    vertical-align: middle;
+  }
+
+  &__badge {
+    display: inline-block;
+    padding: 0.1rem 0.45rem;
+    border-radius: 3px;
+    font-size: 0.8em;
+    font-weight: 600;
+
+    &.--member {
+      background: var(--success-low);
+      color: var(--success);
+    }
+
+    &.--subnet {
+      background: var(--highlight-low);
+      color: var(--highlight);
+    }
+  }
+
+  &__subnet-hint {
+    display: block;
+    color: var(--highlight);
+    font-size: 0.8em;
+    margin-top: 0.15rem;
+
+    code {
+      font-size: 0.9em;
+      margin: 0 0.2rem;
+    }
+  }
+}

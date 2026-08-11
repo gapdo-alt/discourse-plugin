@@ -1,0 +1,20 @@
+plugins:
+  ip_watchlist_enabled:
+    default: true
+    client: true
+  ip_watchlist_org_keywords:
+    default: "huawei|hw cloud|HUAWEI CLOUDS"
+    type: list
+    list_type: simple
+  ip_watchlist_hostname_keywords:
+    default: "hwclouds-dns"
+    type: list
+    list_type: simple
+  ip_watchlist_referrer_patterns:
+    default: ""
+    type: list
+    list_type: simple
+  ip_watchlist_retention_days:
+    default: 90
+    min: 0
+    max: 3650
