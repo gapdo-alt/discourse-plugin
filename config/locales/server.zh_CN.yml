@@ -1,0 +1,9 @@
+zh_CN:
+  site_settings:
+    ip_watchlist_enabled: "启用 IP 观察库与入组规则"
+    ip_watchlist_org_keywords: "组织名关键词（不区分大小写的子串匹配），命中后将登录 IP 写入观察库"
+    ip_watchlist_hostname_keywords: "主机名关键词（不区分大小写的子串匹配），命中后将登录 IP 写入观察库"
+    ip_watchlist_referrer_patterns: "Referrer 通配模式（* 为通配符），例如 *114.114.114.114*"
+    ip_watchlist_retention_days: "观察库保留天数（按最近命中时间；0 表示不自动清理）。已有入组规则的 IP 不会被清理。"
+  ip_watchlist:
+    title: "IP 观察库"

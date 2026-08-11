@@ -1,0 +1,43 @@
+en:
+  admin_js:
+    admin:
+      site_settings:
+        categories:
+          ip_watchlist: "IP Watchlist"
+      plugins:
+        ip_watchlist:
+          title: "IP Watchlist"
+          description: "Observe login IPs by ASN/hostname keywords and referrer wildcards, then promote them into group rules."
+          settings_link: "Plugin settings"
+          watchlist_tab: "Watchlist"
+          enforcement_tab: "Enforcement rules"
+          search_placeholder: "Search IP, organization, hostname, referrer"
+          add_ip: "Add IP"
+          add_ip_placeholder: "Exact IP address"
+          promote: "Promote to groups"
+          promote_title: "Assign groups for this IP"
+          select_groups: "Select one or more groups"
+          save_promote: "Promote and backfill"
+          delete: "Delete"
+          enable: "Enable"
+          disable: "Disable"
+          create_enforcement: "Add enforcement"
+          ip: "IP"
+          reason: "Reason"
+          organization: "Organization"
+          hostname: "Hostname"
+          referrer: "Referrer"
+          hits: "Hits"
+          related_users: "Related users"
+          last_seen: "Last seen"
+          actions: "Actions"
+          group: "Group"
+          enabled: "Enabled"
+          empty_watchlist: "No watched IPs yet."
+          empty_enforcements: "No enforcement rules yet."
+          reasons:
+            org_keyword: "Organization keyword"
+            hostname_keyword: "Hostname keyword"
+            referrer: "Referrer"
+            manual: "Manual"
+          same_ip_users: "Same IP users"
