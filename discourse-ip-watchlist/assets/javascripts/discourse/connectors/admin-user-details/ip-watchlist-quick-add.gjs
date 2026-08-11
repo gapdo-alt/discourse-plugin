@@ -19,6 +19,9 @@ export default class IpWatchlistQuickAdd extends Component {
   @tracked ipGroups = [];
   @tracked selectedIds = [];
   @tracked loading = false;
+  @tracked memberOfGroups = [];
+  @tracked subnetGroups = [];
+  @tracked preloaded = false;
 
   static shouldRender(outletArgs) {
     return outletArgs?.model?.ip_address;
@@ -26,6 +29,28 @@ export default class IpWatchlistQuickAdd extends Component {
 
   get ip() {
     return this.args.outletArgs?.model?.ip_address;
+  }
+
+  constructor() {
+    super(...arguments);
+    this.preloadStatus();
+  }
+
+  async preloadStatus() {
+    if (!this.ip) {
+      return;
+    }
+    try {
+      const result = await ajax("/admin/plugins/ip-watchlist/ip-groups-for-ip", {
+        data: { ip_address: this.ip },
+      });
+      const groups = result.ip_groups || [];
+      this.memberOfGroups = groups.filter((g) => g.is_member);
+      this.subnetGroups = groups.filter((g) => !g.is_member && g.has_same_subnet);
+      this.preloaded = true;
+    } catch {
+      // silently fail on preload
+    }
   }
 
   @action
@@ -95,6 +120,24 @@ export default class IpWatchlistQuickAdd extends Component {
 
   <template>
     <div class="ip-watchlist-quick-add">
+      {{#if this.preloaded}}
+        {{#if this.memberOfGroups.length}}
+          <span class="ip-watchlist-quick-add__badges">
+            {{#each this.memberOfGroups as |g|}}
+              <span class="ip-watchlist-quick-add__badge --member">{{g.name}}</span>
+            {{/each}}
+          </span>
+        {{/if}}
+        {{#if this.subnetGroups.length}}
+          <span class="ip-watchlist-quick-add__badges">
+            {{#each this.subnetGroups as |g|}}
+              <span class="ip-watchlist-quick-add__badge --subnet" title="{{i18n "admin.plugins.ip_watchlist.same_subnet_hint"}}">
+                ⚠ {{g.name}}
+              </span>
+            {{/each}}
+          </span>
+        {{/if}}
+      {{/if}}
       <DButton
         class="btn-default btn-small"
         @icon="binoculars"
@@ -128,7 +171,14 @@ export default class IpWatchlistQuickAdd extends Component {
                     {{/if}}
                     {{#if g.is_member}}
                       <span class="ip-watchlist-quick-add__already">
-                        ({{i18n "admin.plugins.ip_watchlist.already_member"}})
+                        ✓ {{i18n "admin.plugins.ip_watchlist.already_member"}}
+                      </span>
+                    {{else if g.has_same_subnet}}
+                      <span class="ip-watchlist-quick-add__subnet-hint">
+                        ⚠ {{i18n "admin.plugins.ip_watchlist.same_subnet_hint"}}:
+                        {{#each g.same_subnet_ips as |sip|}}
+                          <code>{{sip}}</code>
+                        {{/each}}
                       </span>
                     {{/if}}
                   </label>

@@ -57,3 +57,4 @@ zh_CN:
           no_ip_groups: "尚未创建 IP 组，请先在插件管理中创建。"
           quick_add_success: "IP 已成功加入组。"
           save: "保存"
+          same_subnet_hint: "与组内成员在同一 /24 网段"

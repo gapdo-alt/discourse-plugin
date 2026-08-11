@@ -234,18 +234,36 @@ module ::IpWatchlist
     def ip_groups_for_ip
       ip = normalize_ip!(params.require(:ip_address))
 
-      all_groups = IpWatchlistGroup.includes(:discourse_group_links).order(:name)
+      all_groups =
+        IpWatchlistGroup
+          .includes(:discourse_group_links, :memberships)
+          .order(:name)
+
       member_group_ids =
         IpWatchlistGroupMembership.where(ip_address: ip).pluck(:ip_watchlist_group_id)
+
+      target_subnet = subnet_prefix(ip)
 
       render_json_dump(
         ip_groups:
           all_groups.map do |g|
+            member_ips = g.memberships.pluck(:ip_address).map(&:to_s)
+            is_member = member_group_ids.include?(g.id)
+
+            same_subnet_ips =
+              if !is_member && target_subnet
+                member_ips.select { |mip| subnet_prefix(mip) == target_subnet }
+              else
+                []
+              end
+
             {
               id: g.id,
               name: g.name,
-              is_member: member_group_ids.include?(g.id),
+              is_member: is_member,
               discourse_group_names: g.discourse_groups.pluck(:name),
+              same_subnet_ips: same_subnet_ips,
+              has_same_subnet: same_subnet_ips.present?,
             }
           end,
       )
@@ -298,6 +316,18 @@ module ::IpWatchlist
       ip = IpWatchlistEntry.normalize_ip(raw)
       raise Discourse::InvalidParameters.new(:ip_address) if ip.blank?
       ip
+    end
+
+    # Returns the /24 (IPv4) or /48 (IPv6) prefix string for subnet comparison
+    def subnet_prefix(ip_str)
+      addr = IPAddr.new(ip_str.to_s)
+      if addr.ipv4?
+        addr.mask(24).to_s
+      else
+        addr.mask(48).to_s
+      end
+    rescue IPAddr::InvalidAddressError
+      nil
     end
   end
 end

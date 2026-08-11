@@ -57,3 +57,4 @@ en:
           no_ip_groups: "No IP groups configured. Create one in plugin settings first."
           quick_add_success: "IP added to group(s) successfully."
           save: "Save"
+          same_subnet_hint: "Same /24 subnet as group member"
