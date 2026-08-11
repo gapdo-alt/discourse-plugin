@@ -1,0 +1,5 @@
+en:
+  site_settings:
+    snowball_enabled: "Enable the Snowball plugin"
+  snowball:
+    title: "Snowball"

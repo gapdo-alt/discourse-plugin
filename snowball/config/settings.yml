@@ -1,0 +1,4 @@
+plugins:
+  snowball_enabled:
+    default: false
+    client: true
