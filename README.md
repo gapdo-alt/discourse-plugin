@@ -9,7 +9,10 @@
 
 ## 部署（Docker / app.yml）
 
-Discourse 只加载 `plugins/<目录>/plugin.rb`。多插件仓库需要 clone 后软链到 `plugins/`：
+**不要**克隆到 `/tmp`（重建后可能丢失，导致软链断裂、站点 Oops）。  
+推荐：克隆到 `$home`，再用 `cp -a` 拷贝进 `plugins/`。
+
+在 `containers/app.yml` 的 `hooks.after_code` 中配置：
 
 ```yml
 hooks:
@@ -17,21 +20,21 @@ hooks:
     - exec:
         cd: $home
         cmd:
+          - git clone https://github.com/discourse/docker_manager.git $home/plugins/docker_manager
           - rm -rf $home/discourse-plugins-mono
-          - git clone https://github.com/gapdo-alt/discourse-plugin.git $home/discourse-plugins-mono
-          - ln -sfn $home/discourse-plugins-mono/discourse-ip-watchlist $home/plugins/discourse-ip-watchlist
-          - ln -sfn $home/discourse-plugins-mono/snowball $home/plugins/snowball
+          - git clone -b cursor/ip-group-membership-b098 https://github.com/gapdo-alt/discourse-plugin.git $home/discourse-plugins-mono
+          - rm -rf $home/plugins/discourse-ip-watchlist $home/plugins/snowball
+          - cp -a $home/discourse-plugins-mono/discourse-ip-watchlist $home/plugins/discourse-ip-watchlist
+          - cp -a $home/discourse-plugins-mono/snowball $home/plugins/snowball
 ```
 
-monorepo 克隆在 `$home/discourse-plugins-mono`（持久目录），再软链到 `$home/plugins/<插件名>` 供 Discourse 加载。
+说明：
 
-若需指定分支：
+- 若原 `cmd` 里已有 `docker_manager` 那一行，不要重复添加，只加插件相关几行。
+- 仓库若仍是 **Private**，匿名 clone 会失败（exit 128）：请改为 Public，或在 URL 中加 token：`https://<TOKEN>@github.com/gapdo-alt/discourse-plugin.git`
+- 合并到 `main` 后可去掉 `-b cursor/ip-group-membership-b098`
 
-```yml
-- git clone -b cursor/ip-group-membership-b098 https://github.com/gapdo-alt/discourse-plugin.git $home/discourse-plugins-mono
-```
-
-然后重建：
+然后：
 
 ```bash
 cd /var/discourse
@@ -43,7 +46,6 @@ cd /var/discourse
 ## 本地开发
 
 ```bash
-# 在 Discourse 源码的 plugins 下软链
 ln -s /path/to/discourse-plugin/discourse-ip-watchlist plugins/discourse-ip-watchlist
 ln -s /path/to/discourse-plugin/snowball plugins/snowball
 ```
@@ -52,5 +54,5 @@ ln -s /path/to/discourse-plugin/snowball plugins/snowball
 
 1. 在仓库根目录新建文件夹（建议与 `# name:` 一致）
 2. 放入完整插件结构（至少包含 `plugin.rb`）
-3. 在 `app.yml` 增加对应 `ln -sfn` 行
+3. 在 `app.yml` 增加对应 `cp -a` 行
 4. 更新本 README 的插件列表
