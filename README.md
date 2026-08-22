@@ -43,7 +43,21 @@ cd /var/discourse
 
 在 **管理 → 插件** 中分别启用各插件。
 
-## 本地开发
+## 本地 Docker 测试
+
+在本地用 Docker 跑完整 Discourse 实例测试插件：
+
+```bash
+bash scripts/setup-local-discourse.sh
+```
+
+详见 [`scripts/README-LOCAL-TEST.md`](scripts/README-LOCAL-TEST.md)。
+
+- 访问：http://localhost:8080
+- 插件 UI：http://localhost:8080/admin/plugins/ip-watchlist
+- 嵌套 Docker 环境（如 Cloud Agent）会自动切换存储驱动并加 `--skip-prereqs`
+
+## 本地开发（Discourse 源码目录）
 
 ```bash
 ln -s /path/to/discourse-plugin/discourse-ip-watchlist plugins/discourse-ip-watchlist

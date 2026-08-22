@@ -1,0 +1,47 @@
+## Local Discourse test instance for discourse-ip-watchlist plugin
+## Access: http://127.0.0.1:8080
+## Rebuild after plugin changes: sudo ./launcher rebuild app --skip-prereqs
+
+templates:
+  - "templates/postgres.template.yml"
+  - "templates/redis.template.yml"
+  - "templates/web.template.yml"
+  - "templates/web.ratelimited.template.yml"
+
+expose:
+  - "8080:80"
+
+params:
+  db_default_text_search_config: "pg_catalog.english"
+
+env:
+  LC_ALL: en_US.UTF-8
+  LANG: en_US.UTF-8
+  LANGUAGE: en_US.UTF-8
+
+  DISCOURSE_HOSTNAME: "localhost"
+  DISCOURSE_DEVELOPER_EMAILS: "admin@example.com"
+  DISCOURSE_SKIP_EMAIL_SETUP: "1"
+
+  UNICORN_WORKERS: 2
+
+volumes:
+  - volume:
+      host: /workspace/discourse-docker/shared/standalone
+      guest: /shared
+  - volume:
+      host: /workspace/discourse-docker/shared/standalone/log/var-log
+      guest: /var/log
+  - volume:
+      host: /workspace/discourse-ip-watchlist
+      guest: /var/www/discourse/plugins/discourse-ip-watchlist
+
+hooks:
+  after_code:
+    - exec:
+        cd: $home/plugins
+        cmd:
+          - git clone https://github.com/discourse/docker_manager.git
+
+run:
+  - exec: echo "Local test instance with discourse-ip-watchlist mounted"
