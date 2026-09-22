@@ -9,6 +9,12 @@
 
 enabled_site_setting :ip_watchlist_enabled
 
+# request_store ships as a transitive dependency of Discourse but is never
+# loaded by core, so it must be required explicitly -- otherwise every
+# reference to RequestStore below raises NameError (the whole login hook then
+# fails silently and no IP is ever recorded).
+require "request_store"
+
 register_asset "stylesheets/ip-watchlist.scss"
 
 add_admin_route "ip_watchlist.title", "ip-watchlist", use_new_show_route: true
@@ -53,7 +59,7 @@ after_initialize do
         :evaluate_ip_watchlist,
         user_id: user.id,
         ip_address: user.ip_address.to_s,
-        referrer: RequestStore.store[:ip_watchlist_referrer],
+        referrer: ::RequestStore.store[:ip_watchlist_referrer],
       )
     rescue StandardError => e
       Rails.logger.warn("[IpWatchlist] user_logged_in hook failed: #{e.message}")
