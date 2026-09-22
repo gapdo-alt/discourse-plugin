@@ -1,0 +1,31 @@
+zh_CN:
+  site_settings:
+    snowball_enabled: "启用 Snowball 员工验证"
+    snowball_api_url: "Snowball API 地址"
+    snowball_verified_group: "验证通过后加入的群组"
+    snowball_trust_level: "验证通过后的信任等级"
+    snowball_show_nav_link: "在导航菜单显示验证入口"
+    snowball_daily_attempt_limit: "每天最多验证次数"
+    snowball_weekly_attempt_limit: "每周最多验证次数"
+    snowball_validity_days: "验证有效期（天）"
+    snowball_expired_group: "过期后移入的群组"
+  snowball:
+    errors:
+      daily_limit: "今日验证次数已用完（每天最多 %{limit} 次）"
+      weekly_limit: "本周验证次数已用完（每周最多 %{limit} 次）"
+
+en:
+  site_settings:
+    snowball_enabled: "Enable Snowball employee verification"
+    snowball_api_url: "Snowball API base URL"
+    snowball_verified_group: "Group to join after verification"
+    snowball_trust_level: "Trust level after verification"
+    snowball_show_nav_link: "Show verification link in navigation"
+    snowball_daily_attempt_limit: "Maximum verifications per day"
+    snowball_weekly_attempt_limit: "Maximum verifications per week"
+    snowball_validity_days: "Verification validity (days)"
+    snowball_expired_group: "Group to move into after expiry"
+  snowball:
+    errors:
+      daily_limit: "You have used all verifications for today (max %{limit} per day)."
+      weekly_limit: "You have used all verifications for this week (max %{limit} per week)."

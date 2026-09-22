@@ -1,5 +1,3 @@
-export default {
-  buildRoutes() {
-    this.route("snowballVerify", { path: "/snowball" });
-  },
-};
+export default function () {
+  this.route("snowballVerify", { path: "/snowball" });
+}

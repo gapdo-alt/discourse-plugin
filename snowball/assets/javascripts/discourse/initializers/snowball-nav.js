@@ -10,14 +10,17 @@ export default {
         return;
       }
 
-      api.addCommunitySectionLink((dropdown) => {
-        dropdown.addLink({
-          name: "snowball-verify",
-          route: "snowballVerify",
-          title: i18n("snowball.nav_title"),
-          label: i18n("snowball.nav_title"),
-          icon: "id-card",
-        });
+      // addCommunitySectionLink accepts a plain descriptor object (the same
+      // shape core's discourse-cakeday uses) or a factory that returns a
+      // subclass of the base section link.  The descriptor is read through
+      // name/text/title/href/route/icon getters, so `label` is not a valid
+      // key -- the visible text must be passed as `text`.
+      api.addCommunitySectionLink({
+        name: "snowball-verify",
+        route: "snowballVerify",
+        title: i18n("snowball.nav_title"),
+        text: i18n("snowball.nav_title"),
+        icon: "id-card",
       });
     });
   },

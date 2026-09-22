@@ -1,0 +1,15 @@
+en:
+  site_settings:
+    snowball_enabled: "Enable Snowball employee verification"
+    snowball_api_url: "Snowball API base URL"
+    snowball_verified_group: "Group to join after verification"
+    snowball_trust_level: "Trust level after verification"
+    snowball_show_nav_link: "Show verification link in navigation"
+    snowball_daily_attempt_limit: "Maximum verifications per day"
+    snowball_weekly_attempt_limit: "Maximum verifications per week"
+    snowball_validity_days: "Verification validity (days)"
+    snowball_expired_group: "Group to move into after expiry"
+  snowball:
+    errors:
+      daily_limit: "You have used all verifications for today (max %{limit} per day)."
+      weekly_limit: "You have used all verifications for this week (max %{limit} per week)."

@@ -1,105 +1,46 @@
+// Keep this page on Discourse's own type scale and form controls so it matches
+// the rest of the UI (e.g. the admin settings forms) instead of inventing its
+// own oversized look.  Only layout/spacing is custom; sizes come from theme
+// variables.
+
 .snowball-page {
-  padding: 1.5rem 0 2.5rem;
+  padding: 1rem 0 2rem;
 }
 
 .snowball-wrap {
-  max-width: 720px;
+  max-width: 40rem;
   margin: 0 auto;
-  padding: 0 1rem;
 }
 
 .snowball-wrap h1 {
-  font-size: 1.6rem;
-  margin: 0 0 0.5rem;
+  font-size: var(--font-up-2);
+  line-height: var(--line-height-medium, 1.4);
+  margin: 0 0 0.25rem;
 }
 
 .snowball-muted {
   color: var(--primary-medium);
-  font-size: 1rem;
+}
+
+// remaining attempts line
+.snowball-remaining {
+  margin: 0.35rem 0 0.75rem;
+  font-size: var(--font-down-1);
 }
 
 .snowball-card {
-  background: var(--secondary);
-  border: 1px solid var(--primary-low);
-  border-radius: 12px;
-  padding: 1.5rem;
   margin-top: 1rem;
 }
 
-.snowball-btn {
-  margin-top: 0.5rem;
-}
-
-.snowball-btn.secondary {
-  margin-top: 1rem;
-}
-
-.snowball-input {
-  width: 100%;
-  margin-bottom: 0.85rem;
-  font-size: 1.1rem;
-  padding: 0.65rem 0.75rem;
-}
-
-.snowball-q-row {
-  margin-bottom: 1.35rem;
-  padding-bottom: 1.35rem;
-  border-bottom: 1px solid var(--primary-low);
-}
-
-.snowball-q-row:last-of-type {
-  border-bottom: none;
-}
-
-.snowball-q-id {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.55rem;
-  align-items: center;
-  margin-bottom: 0.85rem;
-  line-height: 1.2;
-}
-
-.snowball-id-part {
-  display: inline-block;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 2rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  background: var(--primary-very-low);
-  border: 1px solid var(--primary-low);
-  border-radius: 10px;
-  padding: 0.45rem 0.7rem;
-  min-width: 2.6em;
-  text-align: center;
-}
-
-.snowball-q-row.unanswered {
-  border-radius: 10px;
-  outline: 2px solid var(--danger);
-  outline-offset: 4px;
-}
-
-.snowball-input:focus {
-  outline: 2px solid var(--tertiary);
-  outline-offset: 1px;
-}
-
-.snowball-checkbox {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-  font-size: 1rem;
-  color: var(--primary-medium);
-  cursor: pointer;
-  margin-top: 0.35rem;
-}
-
+// Countdown: label + seconds, left aligned
 .snowball-timer {
-  font-size: 2.4rem;
-  font-weight: 700;
-  text-align: center;
-  margin-bottom: 1rem;
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-start;
+  gap: 0.35em;
+  margin-bottom: 0.5rem;
+  font-size: var(--font-up-1);
+  font-weight: 600;
   color: var(--danger);
 }
 
@@ -107,11 +48,96 @@
   color: var(--success);
 }
 
-.snowball-result {
-  padding: 1rem;
-  border-radius: 8px;
+.snowball-timer-label {
+  font-size: var(--font-down-1);
+  font-weight: 400;
+  color: var(--primary-medium);
+}
+
+// One question per line: id | 姓 | input | 离职
+// `fit-content` keeps the separator line exactly as wide as the row content.
+.snowball-q-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  width: fit-content;
+  max-width: 100%;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--primary-low);
+}
+
+.snowball-q-row:last-of-type {
+  border-bottom: 0;
+}
+
+.snowball-q-id {
+  flex: 0 0 6.5em;
+  font-size: var(--font-0);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.snowball-q-label {
+  margin: 0;
+  font-size: var(--font-down-1);
+  color: var(--primary-medium);
+}
+
+// Input is exactly one CJK character wide
+.snowball-input {
+  flex: 0 0 auto;
+  width: 2.2em;
+  height: var(--space-9, 2.25em);
+  padding: 0 0.25em;
+  margin: 0;
+  box-sizing: border-box;
   text-align: center;
-  font-size: 1.05rem;
+  font-size: var(--font-0);
+  background: var(--token-color-background-input, var(--secondary));
+  border: 1px solid var(--primary-low-mid);
+  border-radius: var(--d-input-border-radius, var(--d-border-radius, 4px));
+  appearance: none;
+
+  &:focus {
+    outline: 2px solid var(--tertiary);
+    outline-offset: 1px;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+  }
+}
+
+.snowball-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0 0 0 0.25rem;
+  font-size: var(--font-down-1);
+  color: var(--primary-medium);
+  cursor: pointer;
+}
+
+.snowball-btn {
+  margin-top: 0.75rem;
+}
+
+.snowball-btn.secondary {
+  margin-top: 1rem;
+}
+
+.snowball-q-row.unanswered {
+  outline: 2px solid var(--danger);
+  outline-offset: 2px;
+  border-radius: var(--d-border-radius, 4px);
+}
+
+.snowball-result {
+  padding: 0.75rem;
+  border-radius: var(--d-border-radius, 4px);
+  text-align: center;
 }
 
 .snowball-result.pass {
@@ -125,7 +151,7 @@
 }
 
 .snowball-error {
+  margin-top: 0.5rem;
+  font-size: var(--font-down-1);
   color: var(--danger);
-  margin-top: 0.75rem;
-  font-size: 0.9rem;
 }

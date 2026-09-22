@@ -18,3 +18,25 @@ plugins:
   snowball_show_nav_link:
     default: true
     client: true
+  snowball_daily_attempt_limit:
+    default: 3
+    min: 0
+    max: 100
+    client: false
+    description: "每个用户每天最多可发起的验证次数（0 表示不限制）"
+  snowball_weekly_attempt_limit:
+    default: 3
+    min: 0
+    max: 100
+    client: false
+    description: "每个用户每周最多可发起的验证次数（0 表示不限制）"
+  snowball_validity_days:
+    default: 180
+    min: 0
+    max: 3650
+    client: false
+    description: "验证有效期（天）。超过后自动移出验证群组；0 表示永不过期"
+  snowball_expired_group:
+    default: ""
+    client: false
+    description: "验证过期后移入的群组名称（留空表示只移出、不加入其它群组）"
