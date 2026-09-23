@@ -85,16 +85,19 @@
   color: var(--primary-medium);
 }
 
-// Input is exactly one CJK character wide
+// Wide enough for a full CJK glyph (about 3 characters) and one step larger
+// than body text: with the old 2.2em box the glyph touched both borders and
+// looked clipped.
 .snowball-input {
   flex: 0 0 auto;
-  width: 2.2em;
-  height: var(--space-9, 2.25em);
-  padding: 0 0.25em;
+  width: 3.2em;
+  height: 2.6em;
+  padding: 0 0.4em;
   margin: 0;
   box-sizing: border-box;
   text-align: center;
-  font-size: var(--font-0);
+  line-height: 1;
+  font-size: var(--font-up-1);
   background: var(--token-color-background-input, var(--secondary));
   border: 1px solid var(--primary-low-mid);
   border-radius: var(--d-input-border-radius, var(--d-border-radius, 4px));
