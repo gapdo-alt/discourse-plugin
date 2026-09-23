@@ -19,7 +19,10 @@ module SnowballVerifier
   PROBE_QUESTIONS = 2
   PASS_THRESHOLD = 2
   CONFIDENCE_PENALTY = 3
-  PROBE_RANGE = (6_000_000..9_000_000)
+  # Employee ids are 6 digit numbers zero padded to 8 characters, so the
+  # documented probe range "00600000-00900000" is 600_000..900_000 -- reading
+  # it as 6_000_000 would generate ids that no longer look like staff numbers.
+  PROBE_RANGE = (600_000..900_000)
   DEFAULT_RADIUS = 1000
   OBSERVATION_FACTOR = 1.05
   MAX_PROBE_WEIGHT = 2.5
