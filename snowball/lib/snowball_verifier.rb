@@ -14,6 +14,10 @@
 #   * probe answered with a surname  => anchor enters the observation library,
 #                                       its +/-1000 neighbourhood gets 5% more
 #                                       likely per anchor, capped at 2.5x
+#
+# All five questions are drawn from one aligned BLOCK_SIZE block of employee
+# ids, so they share their leading digits and only differ in the last three --
+# which makes them much easier to look up in the staff directory.
 module SnowballVerifier
   SEED_QUESTIONS = 3
   PROBE_QUESTIONS = 2
@@ -23,6 +27,9 @@ module SnowballVerifier
   # documented probe range "00600000-00900000" is 600_000..900_000 -- reading
   # it as 6_000_000 would generate ids that no longer look like staff numbers.
   PROBE_RANGE = (600_000..900_000)
+  # Questions share everything above the last three digits: 00612345 and
+  # 00612890 are in the same block, 00612345 and 00622345 are not.
+  BLOCK_SIZE = 1000
   DEFAULT_RADIUS = 1000
   OBSERVATION_FACTOR = 1.05
   MAX_PROBE_WEIGHT = 2.5
@@ -40,12 +47,20 @@ module SnowballVerifier
   module_function
 
   def challenge!(user)
-    seed_ids = pick_seed_ids
+    block, seed_ids = pick_block_and_seeds
     if seed_ids.size < SEED_QUESTIONS
       raise Error.new("种子库为空或可用种子不足，请先在后台导入种子数据", status: 503)
     end
 
-    employee_ids = (seed_ids + pick_probe_ids).shuffle
+    probe_range =
+      block ? (block * BLOCK_SIZE..((block * BLOCK_SIZE) + BLOCK_SIZE - 1)) : PROBE_RANGE
+    probe_ids = pick_probe_ids(probe_range)
+
+    if probe_ids.size < PROBE_QUESTIONS
+      raise Error.new("种子库为空或可用种子不足，请先在后台导入种子数据", status: 503)
+    end
+
+    employee_ids = (seed_ids + probe_ids).shuffle
     challenge =
       SnowballChallenge.create!(
         challenge_id: SecureRandom.uuid,
@@ -122,16 +137,35 @@ module SnowballVerifier
     value.to_s.strip.downcase
   end
 
-  def pick_seed_ids
-    SnowballSeed.usable.order("RANDOM()").limit(SEED_QUESTIONS).pluck(:employee_id)
+  # Picks one aligned block of ids that holds enough usable seeds and returns
+  # [block_prefix, seed_ids].  Falls back to a global draw when the library is
+  # too sparse to cluster (e.g. only a handful of seeds imported).
+  def pick_block_and_seeds
+    seeds_by_block =
+      SnowballSeed.usable.pluck(:employee_id).group_by do |employee_id|
+        employee_id.to_i / BLOCK_SIZE
+      end
+
+    candidates =
+      seeds_by_block.select do |block, ids|
+        ids.size >= SEED_QUESTIONS && (block * BLOCK_SIZE) >= PROBE_RANGE.first
+      end
+
+    if candidates.empty?
+      return [nil, SnowballSeed.usable.order("RANDOM()").limit(SEED_QUESTIONS).pluck(:employee_id)]
+    end
+
+    block, ids = candidates.to_a.sample
+    [block, ids.sample(SEED_QUESTIONS)]
   end
 
-  def pick_probe_ids
+  def pick_probe_ids(range)
     seed_ids = SnowballSeed.pluck(:employee_id).map(&:to_i).to_set
-    affected = probe_weights.reject { |id, _weight| seed_ids.include?(id) }
+    affected =
+      probe_weights.select { |id, _weight| range.cover?(id) && !seed_ids.include?(id) }
 
-    in_range_seeds = seed_ids.count { |id| PROBE_RANGE.cover?(id) }
-    unaffected_count = PROBE_RANGE.size - in_range_seeds - affected.size
+    in_range_seeds = seed_ids.count { |id| range.cover?(id) }
+    unaffected_count = range.size - in_range_seeds - affected.size
     affected_total = affected.values.sum
     total = (unaffected_count * 1.0) + affected_total
     return [] if total <= 0
@@ -154,7 +188,7 @@ module SnowballVerifier
         end
       end
 
-      candidate ||= random_unaffected_id(seed_ids, affected)
+      candidate ||= random_unaffected_id(seed_ids, affected, range)
       next if candidate.nil? || picked.include?(candidate)
 
       picked << candidate
@@ -163,9 +197,9 @@ module SnowballVerifier
     picked.map { |id| format("%08d", id) }
   end
 
-  def random_unaffected_id(seed_ids, affected)
+  def random_unaffected_id(seed_ids, affected, range)
     50.times do
-      id = rand(PROBE_RANGE)
+      id = rand(range)
       next if seed_ids.include?(id) || affected.key?(id)
 
       return id
