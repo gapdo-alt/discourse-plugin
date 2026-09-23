@@ -77,11 +77,12 @@ export default RouteTemplate(
                   type="text"
                   class="snowball-input"
                   data-snowball-input={{id}}
-                  maxlength="1"
                   autocomplete="off"
                   autocapitalize="off"
                   value={{get @controller.answers id}}
                   disabled={{get @controller.resignedMap id}}
+                  {{on "compositionstart" (fn @controller.compositionStart id)}}
+                  {{on "compositionend" (fn @controller.compositionEnd id)}}
                   {{on "input" (fn @controller.updateAnswer id)}}
                   {{on "keydown" (fn @controller.answerKeydown id index)}}
                 />

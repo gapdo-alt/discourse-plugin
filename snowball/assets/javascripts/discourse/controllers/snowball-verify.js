@@ -105,19 +105,50 @@ export default class SnowballVerifyController extends Controller {
     }
   }
 
+  // IME (pinyin, kana, ...) composition must be left alone while it is in
+  // progress: rewriting the field on every input event cancels the candidate
+  // window, so the user cannot get past the first letter.  Normalise only once
+  // composing has finished.
   @action
   updateAnswer(id, event) {
-    // One answer = one letter (Chinese character, Latin letter, ...).  `maxlength`
-    // only caps the length, so drop digits/punctuation/spaces as well and keep
-    // the field itself in sync.
-    const raw = event.target.value ?? "";
+    if (event.isComposing || event.target?.dataset?.composing === "1") {
+      return;
+    }
+
+    this._commitAnswer(id, event.target);
+  }
+
+  @action
+  compositionStart(id, event) {
+    if (event.target?.dataset) {
+      event.target.dataset.composing = "1";
+    }
+  }
+
+  @action
+  compositionEnd(id, event) {
+    if (event.target?.dataset) {
+      delete event.target.dataset.composing;
+    }
+
+    this._commitAnswer(id, event.target);
+  }
+
+  // One answer = one letter (Chinese character, Latin letter, ...): keep the
+  // first letter and drop digits/punctuation/spaces.
+  _commitAnswer(id, input) {
+    if (!input) {
+      return;
+    }
+
+    const raw = input.value ?? "";
     const cleaned = [...raw]
       .filter((char) => /\p{L}/u.test(char))
       .slice(0, 1)
       .join("");
 
-    if (event.target.value !== cleaned) {
-      event.target.value = cleaned;
+    if (input.value !== cleaned) {
+      input.value = cleaned;
     }
 
     this.answers = { ...this.answers, [id]: cleaned };
