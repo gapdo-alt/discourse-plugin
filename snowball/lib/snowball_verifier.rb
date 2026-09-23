@@ -80,7 +80,9 @@ module SnowballVerifier
       raise Error.new("可用探测工号不足，请调小区块粒度或检查种子库", status: 503)
     end
 
-    employee_ids = (seed_ids + probe_ids).shuffle
+    # Ascending order: all ids come from one block, so a sorted list reads like
+    # the staff directory and is much easier to look up.
+    employee_ids = (seed_ids + probe_ids).sort
     challenge =
       SnowballChallenge.create!(
         challenge_id: SecureRandom.uuid,
