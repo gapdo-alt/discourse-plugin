@@ -1,4 +1,21 @@
 zh_CN:
+  admin_js:
+    admin:
+      plugins:
+        snowball:
+          title: "Snowball 员工验证"
+          description: "本地种子库：上传 JSON 导入工号-姓氏数据，出题与判定全部在本地完成，不依赖外部服务。"
+          stat_seeds: "种子总数"
+          stat_usable: "可用种子"
+          stat_observations: "观察库锚点"
+          stat_resigned: "离职观察锚点"
+          stat_updated: "最近导入"
+          upload_hint: "选择 JSON 文件（支持 Snowball 管理接口导出的 seeds / observations / resigned_observations，三者任意组合）。按工号合并覆盖，不会删除已有记录。"
+          importing: "导入中…"
+          import_ok: "导入完成：种子 %{seeds} 条、观察 %{observations} 条、离职观察 %{resigned} 条"
+          refresh: "刷新统计"
+          wipe: "清空种子库"
+          wipe_confirm: "确定清空全部种子库、观察库与挑战记录吗？此操作不可撤销。"
   js:
     snowball:
       verify_title: "员工验证"
@@ -27,8 +44,26 @@ zh_CN:
       expired_notice: "验证已过期，已移出验证群组"
       limit_daily: "今日验证次数已用完（每天最多 %{limit} 次）"
       limit_weekly: "本周验证次数已用完（每周最多 %{limit} 次）"
+      already_verified: "您已通过验证，无需重复验证"
 
 en:
+  admin_js:
+    admin:
+      plugins:
+        snowball:
+          title: "Snowball verification"
+          description: "Local seed library: upload a JSON export of employee ids and surnames. Challenges and grading run entirely on this server, with no external service."
+          stat_seeds: "Seeds"
+          stat_usable: "Usable seeds"
+          stat_observations: "Observation anchors"
+          stat_resigned: "Resigned anchors"
+          stat_updated: "Last import"
+          upload_hint: "Pick a JSON file (the seeds / observations / resigned_observations exports from the Snowball admin API, in any combination). Rows are merged by employee id; nothing is deleted."
+          importing: "Importing…"
+          import_ok: "Imported: %{seeds} seeds, %{observations} observations, %{resigned} resigned observations"
+          refresh: "Refresh"
+          wipe: "Clear library"
+          wipe_confirm: "Delete every seed, observation and challenge record? This cannot be undone."
   js:
     snowball:
       verify_title: "Employee verification"
@@ -57,3 +92,4 @@ en:
       expired_notice: "Your verification has expired and you were removed from the verified group."
       limit_daily: "You have used all verifications for today (max %{limit} per day)."
       limit_weekly: "You have used all verifications for this week (max %{limit} per week)."
+      already_verified: "You are already verified."

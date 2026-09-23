@@ -15,28 +15,20 @@ class SnowballController < ::ApplicationController
   # #verify).  We still refuse early here so the user finds out before
   # answering a whole quiz.
   def challenge
+    return render_verified_error if already_verified?
+
     blocked_reason = SnowballLimits.blocked_reason(current_user.id)
     return render_limit_error(blocked_reason) if blocked_reason
 
-    res =
-      SnowballApi.challenge(
-        username: current_user.username,
-        client_ip: request.remote_ip,
-        cookies: cookie_header,
-      )
-
-    if res.set_cookie.present?
-      response.headers["Set-Cookie"] = res.set_cookie
-    end
-
-    data = parse_body(res.body)
-
-    render json: with_remaining(data), status: res.status
-  rescue SnowballApi::Error => e
+    data = SnowballVerifier.challenge!(current_user)
+    render json: with_remaining(data)
+  rescue SnowballVerifier::Error => e
     render_json_error(e.message, status: e.status)
   end
 
   def verify
+    return render_verified_error if already_verified?
+
     blocked_reason = SnowballLimits.blocked_reason(current_user.id)
     return render_limit_error(blocked_reason) if blocked_reason
 
@@ -47,29 +39,16 @@ class SnowballController < ::ApplicationController
     return render_json_error("缺少 challenge_id", status: 400) if challenge_id.blank?
     return render_json_error("answers 必须是非空数组", status: 400) if answers.blank?
 
-    normalized =
-      answers.map do |a|
-        h = a.is_a?(Hash) ? a.stringify_keys : {}
-        if ActiveModel::Type::Boolean.new.cast(h["resigned"])
-          { employee_id: h["employee_id"], resigned: true }
-        else
-          { employee_id: h["employee_id"], surname: h["surname"].to_s }
-        end
-      end
+    normalized = answers.map { |answer| normalize_answer(answer) }
 
-    res =
-      SnowballApi.verify(
+    data =
+      SnowballVerifier.verify!(
+        user: current_user,
         challenge_id: challenge_id,
-        username: current_user.username,
         answers: normalized,
-        client_ip: request.remote_ip,
-        cookies: cookie_header,
       )
 
-    data = parse_body(res.body)
-    passed = res.status == 200 && data["passed"]
-
-    # Submitting answers is what consumes one attempt.
+    passed = data["passed"] == true
     SnowballVerificationAttempt.record!(user_id: current_user.id, passed: passed)
 
     if passed
@@ -79,13 +58,8 @@ class SnowballController < ::ApplicationController
       data["discourse_promoted"] = false
     end
 
-    # The upstream API answers a failed verification (and an expired challenge)
-    # with a 4xx plus a user-facing `message`.  That is a normal outcome, not a
-    # transport error -- passing the 4xx through makes the client throw and
-    # hide the message, so answer 200 and let the result screen render it.
-    status = res.status >= 500 ? res.status : 200
-    render json: with_remaining(data), status: status
-  rescue SnowballApi::Error => e
+    render json: with_remaining(data)
+  rescue SnowballVerifier::Error => e
     render_json_error(e.message, status: e.status)
   end
 
@@ -98,29 +72,17 @@ class SnowballController < ::ApplicationController
       current_user.reload
     end
 
-    upstream_verified = SnowballPromoter.verified_on_snowball?(current_user.username)
     expired = SnowballPromoter.expired?(current_user)
-    local_verified = current_user.custom_fields["snowball_verified_at"].present? && !expired
-
-    # Backfill: verified upstream but never promoted locally (and not expired).
-    if upstream_verified && !local_verified && !expired
-      SnowballPromoter.promote!(current_user)
-      current_user.reload
-      local_verified = true
-    end
+    verified = current_user.custom_fields["snowball_verified_at"].present? && !expired
 
     render json: {
              username: current_user.username,
-             verified: local_verified,
-             snowball_verified: upstream_verified,
-             discourse_verified: local_verified,
+             verified: verified,
              expired: expired,
              verified_at: current_user.custom_fields["snowball_verified_at"],
              expires_at: SnowballPromoter.expires_at(current_user)&.iso8601,
              remaining_attempts: SnowballLimits.remaining(current_user.id),
            }
-  rescue SnowballApi::Error => e
-    render_json_error(e.message, status: e.status)
   end
 
   private
@@ -129,8 +91,18 @@ class SnowballController < ::ApplicationController
     raise Discourse::InvalidAccess unless SiteSetting.snowball_enabled
   end
 
-  def cookie_header
-    request.headers["Cookie"]
+  # Already verified and still inside the validity window -> nothing to do.
+  def already_verified?
+    current_user.custom_fields["snowball_verified_at"].present? &&
+      !SnowballPromoter.expired?(current_user)
+  end
+
+  def render_verified_error
+    render json: {
+             error: I18n.t("snowball.errors.already_verified"),
+             error_type: "snowball_already_verified",
+           },
+           status: 409
   end
 
   def render_limit_error(reason)
@@ -146,12 +118,6 @@ class SnowballController < ::ApplicationController
 
   def with_remaining(data)
     data.merge("remaining_attempts" => SnowballLimits.remaining(current_user.id))
-  end
-
-  def parse_body(body)
-    JSON.parse(body)
-  rescue JSON::ParserError
-    { "error" => body }
   end
 
   def parse_request_body
@@ -172,8 +138,18 @@ class SnowballController < ::ApplicationController
     when Array
       raw
     when Hash
-      # keep the natural order of the "0", "1", ... keys
       raw.sort_by { |key, _| key.to_i }.map { |_, value| value }
+    end
+  end
+
+  def normalize_answer(answer)
+    hash = answer.is_a?(Hash) ? answer.stringify_keys : {}
+    employee_id = hash["employee_id"].to_s
+
+    if ActiveModel::Type::Boolean.new.cast(hash["resigned"])
+      { employee_id: employee_id, resigned: true }
+    else
+      { employee_id: employee_id, surname: hash["surname"].to_s }
     end
   end
 end

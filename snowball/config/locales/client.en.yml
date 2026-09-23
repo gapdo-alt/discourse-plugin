@@ -1,4 +1,21 @@
 en:
+  admin_js:
+    admin:
+      plugins:
+        snowball:
+          title: "Snowball verification"
+          description: "Local seed library: upload a JSON export of employee ids and surnames. Challenges and grading run entirely on this server, with no external service."
+          stat_seeds: "Seeds"
+          stat_usable: "Usable seeds"
+          stat_observations: "Observation anchors"
+          stat_resigned: "Resigned anchors"
+          stat_updated: "Last import"
+          upload_hint: "Pick a JSON file (the seeds / observations / resigned_observations exports from the Snowball admin API, in any combination). Rows are merged by employee id; nothing is deleted."
+          importing: "Importing…"
+          import_ok: "Imported: %{seeds} seeds, %{observations} observations, %{resigned} resigned observations"
+          refresh: "Refresh"
+          wipe: "Clear library"
+          wipe_confirm: "Delete every seed, observation and challenge record? This cannot be undone."
   js:
     snowball:
       verify_title: "Employee verification"
@@ -27,3 +44,4 @@ en:
       expired_notice: "Your verification has expired and you were removed from the verified group."
       limit_daily: "You have used all verifications for today (max %{limit} per day)."
       limit_weekly: "You have used all verifications for this week (max %{limit} per week)."
+      already_verified: "You are already verified."

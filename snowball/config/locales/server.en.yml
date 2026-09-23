@@ -1,7 +1,6 @@
 en:
   site_settings:
     snowball_enabled: "Enable Snowball employee verification"
-    snowball_api_url: "Snowball API base URL"
     snowball_verified_group: "Group to join after verification"
     snowball_trust_level: "Trust level after verification"
     snowball_show_nav_link: "Show verification link in navigation"
@@ -10,6 +9,9 @@ en:
     snowball_validity_days: "Verification validity (days)"
     snowball_expired_group: "Group to move into after expiry"
   snowball:
+    result_pass: "Employee identity verified"
+    result_fail: "Verification failed. Please check your surnames and try again."
     errors:
       daily_limit: "You have used all verifications for today (max %{limit} per day)."
       weekly_limit: "You have used all verifications for this week (max %{limit} per week)."
+      already_verified: "You are already verified."

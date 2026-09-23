@@ -2,9 +2,6 @@ plugins:
   snowball_enabled:
     default: true
     client: true
-  snowball_api_url:
-    default: "https://snowball-verify.pages.dev"
-    client: false
   snowball_verified_group:
     default: "verified-employees"
     client: false

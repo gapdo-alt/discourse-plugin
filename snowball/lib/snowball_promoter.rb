@@ -76,16 +76,6 @@ module SnowballPromoter
     at.present? && at <= Time.zone.now
   end
 
-  def verified_on_snowball?(username)
-    res = SnowballApi.status(username: username)
-    return false unless res.status == 200
-
-    res.json["verified"] == true
-  rescue SnowballApi::Error => e
-    Rails.logger.warn("[discourse-snowball] status 查询失败: #{e.message}")
-    false
-  end
-
   def add_to_group(group, user)
     return if group.users.exists?(id: user.id)
 

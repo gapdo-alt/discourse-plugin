@@ -1,7 +1,6 @@
 zh_CN:
   site_settings:
     snowball_enabled: "启用 Snowball 员工验证"
-    snowball_api_url: "Snowball API 地址"
     snowball_verified_group: "验证通过后加入的群组"
     snowball_trust_level: "验证通过后的信任等级"
     snowball_show_nav_link: "在导航菜单显示验证入口"
@@ -10,14 +9,16 @@ zh_CN:
     snowball_validity_days: "验证有效期（天）"
     snowball_expired_group: "过期后移入的群组"
   snowball:
+    result_pass: "员工身份验证通过"
+    result_fail: "验证未通过，请核对姓氏后重试"
     errors:
       daily_limit: "今日验证次数已用完（每天最多 %{limit} 次）"
       weekly_limit: "本周验证次数已用完（每周最多 %{limit} 次）"
+      already_verified: "您已通过验证，无需重复验证"
 
 en:
   site_settings:
     snowball_enabled: "Enable Snowball employee verification"
-    snowball_api_url: "Snowball API base URL"
     snowball_verified_group: "Group to join after verification"
     snowball_trust_level: "Trust level after verification"
     snowball_show_nav_link: "Show verification link in navigation"
@@ -26,6 +27,9 @@ en:
     snowball_validity_days: "Verification validity (days)"
     snowball_expired_group: "Group to move into after expiry"
   snowball:
+    result_pass: "Employee identity verified"
+    result_fail: "Verification failed. Please check your surnames and try again."
     errors:
       daily_limit: "You have used all verifications for today (max %{limit} per day)."
       weekly_limit: "You have used all verifications for this week (max %{limit} per week)."
+      already_verified: "You are already verified."
