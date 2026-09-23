@@ -8,6 +8,10 @@ zh_CN:
     snowball_weekly_attempt_limit: "每周最多验证次数"
     snowball_validity_days: "验证有效期（天）"
     snowball_expired_group: "过期后移入的群组"
+    snowball_seed_questions: "种子题数量"
+    snowball_probe_questions: "探测题数量"
+    snowball_pass_threshold: "通过所需答对题数"
+    snowball_block_size: "区块粒度（同号段大小）"
   snowball:
     result_pass: "员工身份验证通过"
     result_fail: "验证未通过，请核对姓氏后重试"
@@ -26,6 +30,10 @@ en:
     snowball_weekly_attempt_limit: "Maximum verifications per week"
     snowball_validity_days: "Verification validity (days)"
     snowball_expired_group: "Group to move into after expiry"
+    snowball_seed_questions: "Seed questions per quiz"
+    snowball_probe_questions: "Probe questions per quiz"
+    snowball_pass_threshold: "Correct seed answers needed to pass"
+    snowball_block_size: "Block granularity (ids in one block)"
   snowball:
     result_pass: "Employee identity verified"
     result_fail: "Verification failed. Please check your surnames and try again."

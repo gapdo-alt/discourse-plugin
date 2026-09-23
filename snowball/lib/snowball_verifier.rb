@@ -19,17 +19,15 @@
 # ids, so they share their leading digits and only differ in the last three --
 # which makes them much easier to look up in the staff directory.
 module SnowballVerifier
-  SEED_QUESTIONS = 3
-  PROBE_QUESTIONS = 2
-  PASS_THRESHOLD = 2
   CONFIDENCE_PENALTY = 3
   # Employee ids are 6 digit numbers zero padded to 8 characters, so the
   # documented probe range "00600000-00900000" is 600_000..900_000 -- reading
   # it as 6_000_000 would generate ids that no longer look like staff numbers.
   PROBE_RANGE = (600_000..900_000)
-  # Questions share everything above the last three digits: 00612345 and
-  # 00612890 are in the same block, 00612345 and 00622345 are not.
-  BLOCK_SIZE = 1000
+  # Questions share everything above the last `block_size` digits (a setting):
+  # with 1000, 00612345 and 00612890 are in the same block, 00612345 and
+  # 00622345 are not.
+  DEFAULT_BLOCK_SIZE = 1000
   DEFAULT_RADIUS = 1000
   OBSERVATION_FACTOR = 1.05
   MAX_PROBE_WEIGHT = 2.5
@@ -46,18 +44,40 @@ module SnowballVerifier
 
   module_function
 
+  # ── configuration (admin → settings → plugins) ─────────────────────────
+  def seed_questions
+    SiteSetting.snowball_seed_questions.to_i.clamp(0, 9)
+  end
+
+  def probe_questions
+    SiteSetting.snowball_probe_questions.to_i.clamp(0, 9)
+  end
+
+  def pass_threshold
+    SiteSetting.snowball_pass_threshold.to_i.clamp(0, 9)
+  end
+
+  def block_size
+    size = SiteSetting.snowball_block_size.to_i
+    size.positive? ? size : DEFAULT_BLOCK_SIZE
+  end
+
   def challenge!(user)
+    if seed_questions + probe_questions <= 0
+      raise Error.new("题目数量配置为 0（种子题 + 探测题），无法出题", status: 503)
+    end
+
     block, seed_ids = pick_block_and_seeds
-    if seed_ids.size < SEED_QUESTIONS
+    if seed_ids.size < seed_questions
       raise Error.new("种子库为空或可用种子不足，请先在后台导入种子数据", status: 503)
     end
 
     probe_range =
-      block ? (block * BLOCK_SIZE..((block * BLOCK_SIZE) + BLOCK_SIZE - 1)) : PROBE_RANGE
+      block ? (block * block_size..((block * block_size) + block_size - 1)) : PROBE_RANGE
     probe_ids = pick_probe_ids(probe_range)
 
-    if probe_ids.size < PROBE_QUESTIONS
-      raise Error.new("种子库为空或可用种子不足，请先在后台导入种子数据", status: 503)
+    if probe_ids.size < probe_questions
+      raise Error.new("可用探测工号不足，请调小区块粒度或检查种子库", status: 503)
     end
 
     employee_ids = (seed_ids + probe_ids).shuffle
@@ -107,12 +127,12 @@ module SnowballVerifier
       end
     end
 
-    passed = seed_correct >= PASS_THRESHOLD
+    passed = seed_correct >= pass_threshold
     challenge.update!(completed_at: Time.zone.now, passed: passed)
 
     payload = {
       "passed" => passed,
-      "pass_threshold" => PASS_THRESHOLD,
+      "pass_threshold" => pass_threshold,
       "message" =>
         (
           if passed
@@ -138,25 +158,32 @@ module SnowballVerifier
   end
 
   # Picks one aligned block of ids that holds enough usable seeds and returns
-  # [block_prefix, seed_ids].  Falls back to a global draw when the library is
-  # too sparse to cluster (e.g. only a handful of seeds imported).
+  # [block_prefix, seed_ids].  With no seed questions configured the block is
+  # chosen at random inside the probe range, purely to keep the questions
+  # clustered.  Falls back to a global draw when the library is too sparse to
+  # cluster (e.g. only a handful of seeds imported).
   def pick_block_and_seeds
+    if seed_questions.zero?
+      blocks = [(PROBE_RANGE.size / block_size), 1].max
+      return [(PROBE_RANGE.first / block_size) + rand(blocks), []]
+    end
+
     seeds_by_block =
       SnowballSeed.usable.pluck(:employee_id).group_by do |employee_id|
-        employee_id.to_i / BLOCK_SIZE
+        employee_id.to_i / block_size
       end
 
     candidates =
       seeds_by_block.select do |block, ids|
-        ids.size >= SEED_QUESTIONS && (block * BLOCK_SIZE) >= PROBE_RANGE.first
+        ids.size >= seed_questions && (block * block_size) >= PROBE_RANGE.first
       end
 
     if candidates.empty?
-      return [nil, SnowballSeed.usable.order("RANDOM()").limit(SEED_QUESTIONS).pluck(:employee_id)]
+      return [nil, SnowballSeed.usable.order("RANDOM()").limit(seed_questions).pluck(:employee_id)]
     end
 
     block, ids = candidates.to_a.sample
-    [block, ids.sample(SEED_QUESTIONS)]
+    [block, ids.sample(seed_questions)]
   end
 
   def pick_probe_ids(range)
@@ -172,7 +199,7 @@ module SnowballVerifier
 
     picked = []
     attempts = 0
-    while picked.size < PROBE_QUESTIONS && attempts < 200
+    while picked.size < probe_questions && attempts < 200
       attempts += 1
       candidate = nil
       roll = rand * total

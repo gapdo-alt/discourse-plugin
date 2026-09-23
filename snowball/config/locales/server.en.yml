@@ -8,6 +8,10 @@ en:
     snowball_weekly_attempt_limit: "Maximum verifications per week"
     snowball_validity_days: "Verification validity (days)"
     snowball_expired_group: "Group to move into after expiry"
+    snowball_seed_questions: "Seed questions per quiz"
+    snowball_probe_questions: "Probe questions per quiz"
+    snowball_pass_threshold: "Correct seed answers needed to pass"
+    snowball_block_size: "Block granularity (ids in one block)"
   snowball:
     result_pass: "Employee identity verified"
     result_fail: "Verification failed. Please check your surnames and try again."

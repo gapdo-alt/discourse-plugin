@@ -37,3 +37,27 @@ plugins:
     default: ""
     client: false
     description: "验证过期后移入的群组名称（留空表示只移出、不加入其它群组）"
+  snowball_seed_questions:
+    default: 3
+    min: 0
+    max: 9
+    client: false
+    description: "每份验证里的种子题数量（0~9，来自种子库）"
+  snowball_probe_questions:
+    default: 2
+    min: 0
+    max: 9
+    client: false
+    description: "每份验证里的探测题数量（0~9，随机工号，用于补充观察库）"
+  snowball_pass_threshold:
+    default: 2
+    min: 0
+    max: 9
+    client: false
+    description: "通过验证需要答对的种子题数量（0~9；不能大于种子题数量，否则永远无法通过）"
+  snowball_block_size:
+    default: 1000
+    min: 10
+    max: 1000000
+    client: false
+    description: "区块粒度：同一份验证的工号取自同一个该大小的号段。100=只差后2位，1000=只差后3位，10000=只差后4位"
