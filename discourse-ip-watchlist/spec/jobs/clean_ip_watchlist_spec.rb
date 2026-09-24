@@ -41,4 +41,21 @@ RSpec.describe Jobs::CleanIpWatchlist do
     described_class.new.execute
     expect(IpWatchlistEntry.exists?(id: entry.id)).to eq(true)
   end
+
+  it "keeps stale entries for IPs that were promoted into an IP group" do
+    SiteSetting.ip_watchlist_retention_days = 30
+    ip_group = IpWatchlistGroup.create!(name: "office egress")
+
+    grouped =
+      IpWatchlistEntry.upsert_hit!(ip_address: "203.0.113.5", reason: "manual")
+    grouped.update!(last_seen_at: 60.days.ago, first_seen_at: 60.days.ago)
+    IpWatchlistGroupMembership.create!(
+      ip_watchlist_group_id: ip_group.id,
+      ip_address: "203.0.113.5",
+    )
+
+    described_class.new.execute
+
+    expect(IpWatchlistEntry.exists?(id: grouped.id)).to eq(true)
+  end
 end

@@ -53,12 +53,19 @@ after_initialize do
   on(:user_logged_in) do |user|
     begin
       next unless SiteSetting.ip_watchlist_enabled
-      next if user.blank? || user.ip_address.blank?
+      next if user.blank?
+
+      # Prefer the IP of the request that just logged in.  users.ip_address is
+      # only written on a later request, so reading it here would evaluate the
+      # previous login's IP (and skip the very first login from a new address,
+      # where it is still nil).  The extension above captured it for us.
+      ip_address = ::RequestStore.store[:ip_watchlist_ip].presence || user.ip_address
+      next if ip_address.blank?
 
       Jobs.enqueue(
         :evaluate_ip_watchlist,
         user_id: user.id,
-        ip_address: user.ip_address.to_s,
+        ip_address: ip_address.to_s,
         referrer: ::RequestStore.store[:ip_watchlist_referrer],
       )
     rescue StandardError => e
