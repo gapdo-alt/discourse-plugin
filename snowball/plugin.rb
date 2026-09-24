@@ -55,4 +55,9 @@ Discourse::Application.routes.append do
   get "/admin/snowball/seeds" => "snowball/admin#seeds", :constraints => AdminConstraint.new
   post "/admin/snowball/seeds" => "snowball/admin#import", :constraints => AdminConstraint.new
   delete "/admin/snowball/seeds" => "snowball/admin#destroy_all", :constraints => AdminConstraint.new
+  get "/admin/snowball/library/seeds" => "snowball/admin#library_seeds", :constraints => AdminConstraint.new
+  get "/admin/snowball/library/observations" => "snowball/admin#library_observations",
+      :constraints => AdminConstraint.new
+  get "/admin/snowball/library/resigned_observations" => "snowball/admin#library_resigned_observations",
+      :constraints => AdminConstraint.new
 end

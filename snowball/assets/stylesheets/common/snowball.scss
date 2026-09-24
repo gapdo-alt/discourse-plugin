@@ -195,5 +195,112 @@
     gap: 0.5rem;
     margin-top: 1rem;
   }
+
+  // ── library viewer ──────────────────────────────────────────────────────
+  &__library-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 1rem 0 0.75rem;
+  }
+
+  &__library {
+    margin-bottom: 1.25rem;
+    padding: 0.75rem 0.9rem 0.9rem;
+    background: var(--primary-very-low);
+    border: 1px solid var(--primary-low);
+    border-radius: var(--d-border-radius, 4px);
+  }
+
+  &__library-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    margin-bottom: 0.6rem;
+  }
+
+  &__library-title {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5em;
+    margin: 0;
+    font-size: var(--font-up-1);
+  }
+
+  &__library-count {
+    font-size: var(--font-down-2);
+    font-weight: 400;
+    color: var(--primary-medium);
+  }
+
+  &__library-tools {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  &__search {
+    width: 14em;
+    margin: 0;
+  }
+
+  &__library-empty {
+    margin: 0.5rem 0;
+    color: var(--primary-medium);
+  }
+
+  // Long lists must not push the rest of the page away.
+  &__table-wrap {
+    max-height: 28rem;
+    overflow: auto;
+    background: var(--secondary);
+    border: 1px solid var(--primary-low);
+    border-radius: var(--d-border-radius, 4px);
+  }
+
+  &__table {
+    width: 100%;
+    margin: 0;
+    font-size: var(--font-down-1);
+
+    th,
+    td {
+      padding: 0.35rem 0.6rem;
+      text-align: left;
+      white-space: nowrap;
+      border-bottom: 1px solid var(--primary-low);
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      font-weight: 600;
+      color: var(--primary-medium);
+      background: var(--primary-very-low);
+    }
+
+    tbody tr:last-child td {
+      border-bottom: 0;
+    }
+
+    tbody tr:hover td {
+      background: var(--primary-very-low);
+    }
+  }
+
+  &__pager {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.6rem;
+  }
+
+  &__pager-text {
+    font-size: var(--font-down-1);
+    color: var(--primary-medium);
+  }
 }
 
