@@ -11,7 +11,7 @@
 - 验证通过后：加入指定群组 + 提升信任等级 + 写入用户自定义字段 `snowball_verified_at`
 - **次数限制**：每天 / 每周最多 N 次（默认 3/3，0 = 不限）。**提交答案才算一次**，开始验证不消耗
 - **有效期**：默认 180 天。到期由每日任务（以及打开页面时的懒检查）自动移出验证群组并移入过期群组；**设为 0 = 永久有效**
-- 后台管理页：导入 / 清空种子库、查看统计
+- 后台管理页：导入 / 清空种子库、查看统计；可一键展开**种子库 / 观察库 / 离职库清单**（分页 + 按工号筛选）
 - 导航菜单入口（可关闭）
 
 **代码中不含任何种子数据**，库是空的，必须由管理员导入。
@@ -92,6 +92,14 @@
 
 验证状态记录在 Discourse 的用户自定义字段里：`snowball_verified_at`、`snowball_expired_at`。
 
+## 后台页面
+
+后台 → 插件 → Snowball（`/admin/plugins/snowball`）：
+
+- 顶部一行统计：种子总数 / 可用种子 / 观察库锚点 / 离职观察锚点 / 最近导入时间
+- **查看种子库 / 查看观察库 / 查看离职库** 三个按钮展开对应清单，再点一次收起。清单表头吸顶、区域独立滚动（最长 28rem），支持翻页和按工号筛选，工号按 `00 000 000` 分组显示
+- 下方是 JSON 上传区（导入）和 `刷新统计` / `清空种子库`。导入或清空时若清单正打开会自动刷新
+
 ## 管理接口（后台页面使用，仅管理员）
 
 | 方法 | 路径 | 说明 |
@@ -99,6 +107,25 @@
 | `GET` | `/admin/snowball/seeds` | 统计（**不返回种子内容**） |
 | `POST` | `/admin/snowball/seeds` | 导入 JSON（参数 `payload`） |
 | `DELETE` | `/admin/snowball/seeds` | 清空种子库 / 观察库 / 挑战 |
+| `GET` | `/admin/snowball/library/seeds` | 种子库清单 |
+| `GET` | `/admin/snowball/library/observations` | 观察库清单 |
+| `GET` | `/admin/snowball/library/resigned_observations` | 离职观察库清单 |
+
+三个 `library` 接口都是只读分页查询，参数相同：
+
+| 参数 | 说明 | 默认 |
+|---|---|---|
+| `page` | 页码（从 1 开始） | `1` |
+| `per_page` | 每页行数，上限 200 | `50` |
+| `q` | 按工号筛选（服务端只保留数字字符，如 `5186`） | 空 |
+
+返回 `{ "total": 228, "page": 1, "per_page": 50, "items": [ … ] }`：
+
+- `seeds`：`employee_id`、`surname`、`confidence`、`status`、`in_active_pool`、`resigned_signals`、`updated_at`
+- `observations`：`employee_id`、`votes`（`{"王": 1}`）、`total`、`updated_at`
+- `resigned_observations`：`employee_id`、`resigned_votes`、`probe_weight`、`range_radius`、`updated_at`
+
+排序：种子库按工号升序；观察库按总票数降序；离职观察库按离职票数降序。
 
 ## 用户流程
 
@@ -129,9 +156,20 @@ snowball/
   app/jobs/scheduled/snowball_expire_verifications.rb
   lib/snowball_{verifier,seed_import,limits,promoter}.rb
   assets/javascripts/discourse/...        # 前台页面
-  admin/assets/javascripts/discourse/...  # 后台种子库页面
   assets/stylesheets/common/snowball.scss
+  admin/assets/javascripts/discourse/
+    initializers/snowball-admin-nav.js
+    snowball-admin-route-map.js
+    controllers/admin-plugins/show/snowball.js   # ★ 路由 / 控制器 / 模板三者
+    routes/admin-plugins/show/snowball.js        #   必须同名同目录。写成扁平的
+    templates/admin-plugins/show/snowball.gjs    #   admin-plugins-show-snowball.js
+                                                 #   会触发关键废弃告警
+                                                 #   discourse.deprecated-resolver-normalization
 ```
+
+> 后台那三个文件的名字不是随便起的：Discourse 的 resolver 只认 `admin-plugins/show/<name>` 这一种写法
+> （官方插件 discourse-ai 也是这个布局）。改名后会退回旧的查找方式，并在后台弹出
+> 「包含需要更新的代码」的管理员通知。
 
 ## 相关链接
 
