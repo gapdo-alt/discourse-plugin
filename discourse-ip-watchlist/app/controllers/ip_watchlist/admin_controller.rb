@@ -19,12 +19,16 @@ module ::IpWatchlist
           )
       end
 
+      # Load once: the flat list and the subnet/ASN aggregation share the rows.
+      entries = entries.to_a
+
       render_json_dump(
         entries: ActiveModel::ArraySerializer.new(
           entries,
           each_serializer: IpWatchlistEntrySerializer,
           root: false,
         ),
+        aggregates: build_aggregates(entries),
         enforcements: ActiveModel::ArraySerializer.new(
           IpWatchlistEnforcement.includes(:group).order(updated_at: :desc).limit(500),
           each_serializer: IpWatchlistEnforcementSerializer,
@@ -329,6 +333,34 @@ module ::IpWatchlist
       end
     rescue IPAddr::InvalidAddressError
       nil
+    end
+
+    # Collapse the watchlist into one row per (subnet, ASN organization) so a
+    # cloud provider handing out many neighbouring addresses does not flood the
+    # list.  Rows keep their full entry payload so the admin UI can expand a
+    # group and act on a single IP without another request.
+    def build_aggregates(entries)
+      entries
+        .group_by { |entry| [subnet_prefix(entry.ip_address.to_s), entry.organization.to_s] }
+        .map do |(subnet, organization), rows|
+          {
+            key: "#{subnet}|#{organization}",
+            subnet: subnet,
+            organization: organization.presence,
+            ip_count: rows.size,
+            hit_count: rows.sum { |row| row.hit_count.to_i },
+            last_seen_at: rows.filter_map(&:last_seen_at).max,
+            reasons: rows.map(&:reason).uniq,
+            ip_addresses: rows.map { |row| row.ip_address.to_s }.sort,
+            entries:
+              ActiveModel::ArraySerializer.new(
+                rows.sort_by { |row| row.ip_address.to_s },
+                each_serializer: IpWatchlistEntrySerializer,
+                root: false,
+              ),
+          }
+        end
+        .sort_by { |group| [-group[:ip_count], group[:subnet].to_s, group[:organization].to_s] }
     end
   end
 end

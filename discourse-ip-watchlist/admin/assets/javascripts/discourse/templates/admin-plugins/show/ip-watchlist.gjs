@@ -22,7 +22,7 @@ export default RouteTemplate(
       />
 
       <p class="ip-watchlist-admin__settings-link">
-        <a href="/admin/site_settings/category/plugins?filter=ip_watchlist">
+        <a href="/admin/site_settings/category/ip_watchlist">
           {{i18n "admin.plugins.ip_watchlist.settings_link"}}
         </a>
       </p>
@@ -71,9 +71,115 @@ export default RouteTemplate(
             @action={{@controller.addIp}}
             @translatedLabel={{i18n "admin.plugins.ip_watchlist.add_ip"}}
           />
+          <DButton
+            class="btn-default"
+            @action={{@controller.toggleAggregateMode}}
+            @translatedLabel={{if
+              @controller.aggregateMode
+              (i18n "admin.plugins.ip_watchlist.show_individual")
+              (i18n "admin.plugins.ip_watchlist.aggregate_by_subnet")
+            }}
+          />
         </div>
 
-        {{#if @controller.model.entries.length}}
+        {{#if @controller.aggregateMode}}
+          {{#if @controller.aggregates.length}}
+            <p class="ip-watchlist-admin__hint">
+              {{i18n "admin.plugins.ip_watchlist.aggregate_hint"}}
+            </p>
+            <table class="ip-watchlist-admin__table ip-watchlist-admin__table--aggregated">
+              <thead>
+                <tr>
+                  <th>{{i18n "admin.plugins.ip_watchlist.subnet"}}</th>
+                  <th>{{i18n "admin.plugins.ip_watchlist.organization"}}</th>
+                  <th>{{i18n "admin.plugins.ip_watchlist.ip_count"}}</th>
+                  <th>{{i18n "admin.plugins.ip_watchlist.hits"}}</th>
+                  <th>{{i18n "admin.plugins.ip_watchlist.last_seen"}}</th>
+                  <th>{{i18n "admin.plugins.ip_watchlist.actions"}}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {{#each @controller.aggregates as |aggregate|}}
+                  <tr>
+                    <td><code>{{aggregate.subnet}}</code></td>
+                    <td>{{if aggregate.organization aggregate.organization "—"}}</td>
+                    <td>{{aggregate.ip_count}}</td>
+                    <td>{{aggregate.hit_count}}</td>
+                    <td>{{aggregate.last_seen_at}}</td>
+                    <td class="ip-watchlist-admin__actions">
+                      {{#if (eq aggregate.ip_count 1)}}
+                        {{#each aggregate.entries as |entry|}}
+                          <DButton
+                            class="btn-small btn-primary"
+                            @action={{fn @controller.openPromote entry}}
+                            @translatedLabel={{i18n "admin.plugins.ip_watchlist.promote"}}
+                          />
+                          <DButton
+                            class="btn-small btn-danger"
+                            @icon="trash-can"
+                            @action={{fn @controller.deleteEntry entry}}
+                          />
+                        {{/each}}
+                      {{else}}
+                        <DButton
+                          class="btn-small btn-default"
+                          @action={{fn @controller.toggleGroupExpanded aggregate.key}}
+                          @translatedLabel={{if
+                            (includes @controller.expandedGroups aggregate.key)
+                            (i18n "admin.plugins.ip_watchlist.collapse_ips")
+                            (i18n "admin.plugins.ip_watchlist.expand_ips")
+                          }}
+                        />
+                      {{/if}}
+                    </td>
+                  </tr>
+                  {{#if (includes @controller.expandedGroups aggregate.key)}}
+                    {{#each aggregate.entries as |entry|}}
+                      <tr class="ip-watchlist-admin__subrow">
+                        <td colspan="6">
+                          <div class="ip-watchlist-admin__subrow-inner">
+                            <code class="ip-watchlist-admin__subrow-ip">{{entry.ip_address}}</code>
+                            <span class="ip-watchlist-admin__tag">
+                              {{i18n (concat "admin.plugins.ip_watchlist.reasons." entry.reason)}}
+                            </span>
+                            <span class="ip-watchlist-admin__muted">
+                              {{i18n "admin.plugins.ip_watchlist.hits"}}
+                              {{entry.hit_count}}
+                            </span>
+                            {{#if entry.hostname}}
+                              <span class="ip-watchlist-admin__muted">{{entry.hostname}}</span>
+                            {{/if}}
+                            <a href={{entry.same_ip_admin_url}}>
+                              {{entry.related_user_count}}
+                              ·
+                              {{i18n "admin.plugins.ip_watchlist.same_ip_users"}}
+                            </a>
+                            <span class="ip-watchlist-admin__subrow-actions">
+                              <DButton
+                                class="btn-small btn-primary"
+                                @action={{fn @controller.openPromote entry}}
+                                @translatedLabel={{i18n "admin.plugins.ip_watchlist.promote"}}
+                              />
+                              <DButton
+                                class="btn-small btn-danger"
+                                @icon="trash-can"
+                                @action={{fn @controller.deleteEntry entry}}
+                              />
+                            </span>
+                          </div>
+                        </td>
+                      </tr>
+                    {{/each}}
+                  {{/if}}
+                {{/each}}
+              </tbody>
+            </table>
+          {{else}}
+            <p class="ip-watchlist-admin__empty">
+              {{i18n "admin.plugins.ip_watchlist.empty_watchlist"}}
+            </p>
+          {{/if}}
+        {{else if @controller.model.entries.length}}
           <table class="ip-watchlist-admin__table">
             <thead>
               <tr>

@@ -3,10 +3,10 @@ en:
     admin:
       site_settings:
         categories:
-          ip_watchlist: "IP Watchlist"
+          ip_watchlist: "IP watchlist"
       plugins:
         ip_watchlist:
-          title: "IP Watchlist"
+          title: "IP watchlist"
           description: "Observe login IPs by ASN/hostname keywords and referrer wildcards, then promote them into group rules."
           settings_link: "Plugin settings"
           watchlist_tab: "Watchlist"
@@ -41,6 +41,14 @@ en:
             referrer: "Referrer"
             manual: "Manual"
           same_ip_users: "Same IP users"
+          subnet: "Subnet"
+          ip_count: "IPs"
+          aggregate_by_subnet: "Group by subnet"
+          show_individual: "Show individually"
+          expand_ips: "Show IPs"
+          collapse_ips: "Hide"
+          aggregate_hint: "IPs in the same /24 subnet (IPv6: /48) and the same ASN are merged into one row."
+          empty_aggregates: "Nothing to group yet."
           ip_groups_tab: "IP Groups"
           ip_group_name: "IP Group Name"
           ip_group_name_placeholder: "e.g. HW Cloud Suspicious"

@@ -1,4 +1,8 @@
-plugins:
+# A dedicated settings category (instead of "plugins") gives the plugin a proper
+# display name: Discourse derives the admin title from the translated category
+# label (admin.site_settings.categories.ip_watchlist -> "IP watchlist"), whereas
+# the fallback humanises the plugin directory name into "Ip watchlist".
+ip_watchlist:
   ip_watchlist_enabled:
     default: true
     client: true

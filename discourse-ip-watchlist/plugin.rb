@@ -17,7 +17,10 @@ require "request_store"
 
 register_asset "stylesheets/ip-watchlist.scss"
 
-add_admin_route "ip_watchlist.title", "ip-watchlist", use_new_show_route: true
+# The label is translated as-is inside the admin bundle, so it has to be a full
+# admin_js key -- a bare "ip_watchlist.title" silently falls back to the
+# humanised route name ("Ip watchlist") in the breadcrumb and nav.
+add_admin_route "admin.plugins.ip_watchlist.title", "ip-watchlist", use_new_show_route: true
 
 module ::IpWatchlist
   PLUGIN_NAME = "discourse-ip-watchlist"

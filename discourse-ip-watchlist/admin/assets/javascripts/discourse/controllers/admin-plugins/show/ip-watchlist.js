@@ -17,10 +17,32 @@ export default class AdminPluginsShowIpWatchlistController extends Controller {
   @tracked selectedGroupIds = [];
   @tracked newEnforcementIp = "";
   @tracked newEnforcementGroupId = null;
+  // Watchlist is collapsed by (subnet, ASN) by default; the toggle switches
+  // back to the flat per-IP list.
+  @tracked aggregateMode = true;
+  @tracked expandedGroups = [];
+
+  get aggregates() {
+    return this.model?.aggregates ?? [];
+  }
 
   get reasonLabel() {
     return (reason) =>
       i18n(`admin.plugins.ip_watchlist.reasons.${reason}`) || reason;
+  }
+
+  @action
+  toggleAggregateMode() {
+    this.aggregateMode = !this.aggregateMode;
+  }
+
+  @action
+  toggleGroupExpanded(key) {
+    if (this.expandedGroups.includes(key)) {
+      this.expandedGroups = this.expandedGroups.filter((k) => k !== key);
+    } else {
+      this.expandedGroups = [...this.expandedGroups, key];
+    }
   }
 
   @action

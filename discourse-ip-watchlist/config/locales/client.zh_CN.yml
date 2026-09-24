@@ -3,10 +3,10 @@ zh_CN:
     admin:
       site_settings:
         categories:
-          ip_watchlist: "IP 观察库"
+          ip_watchlist: "IP watchlist"
       plugins:
         ip_watchlist:
-          title: "IP 观察库"
+          title: "IP watchlist"
           description: "按组织名/主机名关键词与 Referrer 通配观察登录 IP，确认后再晋升为入组规则。"
           settings_link: "插件设置"
           watchlist_tab: "观察库"
@@ -41,6 +41,14 @@ zh_CN:
             referrer: "Referrer"
             manual: "手动添加"
           same_ip_users: "同 IP 用户"
+          subnet: "网段"
+          ip_count: "IP 数"
+          aggregate_by_subnet: "按网段聚合"
+          show_individual: "逐条显示"
+          expand_ips: "展开 IP"
+          collapse_ips: "收起"
+          aggregate_hint: "同一 /24 网段（IPv6 为 /48）且同一 ASN 的 IP 已合并为一组。"
+          empty_aggregates: "暂无可聚合的记录。"
           ip_groups_tab: "IP 组"
           ip_group_name: "IP 组名称"
           ip_group_name_placeholder: "例如：华为云可疑"
