@@ -24,6 +24,9 @@ export default class SnowballVerifyController extends Controller {
   @tracked discoursePromoted = false;
   // Payload of /snowball/status (verification state + remaining attempts)
   @tracked status = null;
+  // The start screen must not flash "开始验证" for someone who already passed,
+  // so the card waits for /snowball/status before rendering its contents.
+  @tracked statusLoaded = false;
 
   timerHandle = null;
 
@@ -39,6 +42,8 @@ export default class SnowballVerifyController extends Controller {
       this.status = await ajax("/snowball/status");
     } catch {
       // ignore -- the verification page still works without this payload
+    } finally {
+      this.statusLoaded = true;
     }
   }
 
@@ -48,6 +53,32 @@ export default class SnowballVerifyController extends Controller {
 
   get canSubmit() {
     return !this.loading && this.timerLeft > 0;
+  }
+
+  // Already verified and still inside the validity window: nothing left to do,
+  // so the form (attempt counters, start button) is replaced by a notice.
+  get isVerified() {
+    return !!this.status?.verified;
+  }
+
+  get verifiedDetail() {
+    if (!this.isVerified) {
+      return "";
+    }
+
+    const expiry = this.status?.expires_at
+      ? this._shortDate(this.status.expires_at)
+      : i18n("snowball.verified_forever");
+
+    return i18n("snowball.verified_detail", {
+      verified_at: this._shortDate(this.status?.verified_at),
+      expires_at: expiry,
+    });
+  }
+
+  _shortDate(value) {
+    const text = String(value ?? "");
+    return text ? text.slice(0, 10) : "—";
   }
 
   // "今日剩余 2 次 · 本周剩余 2 次" (or the unlimited wording)
@@ -135,7 +166,9 @@ export default class SnowballVerifyController extends Controller {
   }
 
   // One answer = one letter (Chinese character, Latin letter, ...): keep the
-  // first letter and drop digits/punctuation/spaces.
+  // first letter and drop digits/punctuation/spaces.  Latin letters are folded
+  // to upper case so "l" and "L" are the same answer (the server compares
+  // case-insensitively too).
   _commitAnswer(id, input) {
     if (!input) {
       return;
@@ -145,7 +178,8 @@ export default class SnowballVerifyController extends Controller {
     const cleaned = [...raw]
       .filter((char) => /\p{L}/u.test(char))
       .slice(0, 1)
-      .join("");
+      .join("")
+      .toUpperCase();
 
     if (input.value !== cleaned) {
       input.value = cleaned;

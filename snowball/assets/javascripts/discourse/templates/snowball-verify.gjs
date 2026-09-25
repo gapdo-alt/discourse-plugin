@@ -38,24 +38,33 @@ export default RouteTemplate(
               {{i18n "snowball.current_user"}}
               <strong>{{@controller.currentUser.username}}</strong>
             </p>
-            {{#if @controller.expiredNotice}}
-              <p class="snowball-error">{{@controller.expiredNotice}}</p>
-            {{/if}}
-            {{#if @controller.remainingText}}
-              <p class="snowball-muted snowball-remaining">{{@controller.remainingText}}</p>
-            {{/if}}
-            <button
-              class="btn btn-primary snowball-btn"
-              type="button"
-              disabled={{@controller.loading}}
-              {{on "click" @controller.startChallenge}}
-            >
-              {{#if @controller.loading}}
-                {{i18n "snowball.loading"}}
+            {{#if @controller.statusLoaded}}
+              {{#if @controller.isVerified}}
+                <p class="snowball-verified">{{i18n "snowball.verified_done"}}</p>
+                {{#if @controller.verifiedDetail}}
+                  <p class="snowball-muted snowball-verified-detail">{{@controller.verifiedDetail}}</p>
+                {{/if}}
               {{else}}
-                {{i18n "snowball.start"}}
+                {{#if @controller.expiredNotice}}
+                  <p class="snowball-error">{{@controller.expiredNotice}}</p>
+                {{/if}}
+                {{#if @controller.remainingText}}
+                  <p class="snowball-muted snowball-remaining">{{@controller.remainingText}}</p>
+                {{/if}}
+                <button
+                  class="btn btn-primary snowball-btn"
+                  type="button"
+                  disabled={{@controller.loading}}
+                  {{on "click" @controller.startChallenge}}
+                >
+                  {{#if @controller.loading}}
+                    {{i18n "snowball.loading"}}
+                  {{else}}
+                    {{i18n "snowball.start"}}
+                  {{/if}}
+                </button>
               {{/if}}
-            </button>
+            {{/if}}
             {{#if @controller.errorMessage}}
               <p class="snowball-error">{{@controller.errorMessage}}</p>
             {{/if}}

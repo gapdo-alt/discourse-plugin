@@ -34,6 +34,15 @@ const COLUMNS = {
     { key: "range_radius", label: `${BASE}.col_range_radius` },
     { key: "updated_at", label: `${BASE}.col_updated_at`, format: "time" },
   ],
+  // One row per submitted verification (pass or fail), so an admin can see who
+  // tried, when, and what the account's current verification state is.
+  verifications: [
+    { key: "created_at", label: `${BASE}.col_attempted_at`, format: "time" },
+    { key: "username", label: `${BASE}.col_username` },
+    { key: "outcome", label: `${BASE}.col_outcome`, format: "outcome" },
+    { key: "verified_at", label: `${BASE}.col_verified_at`, format: "time" },
+    { key: "expires_at", label: `${BASE}.col_expires_at`, format: "time" },
+  ],
 };
 
 export default class AdminPluginsShowSnowballController extends Controller {
@@ -71,12 +80,28 @@ export default class AdminPluginsShowSnowballController extends Controller {
     return this.stats?.last_seed_at ? this.stats.last_seed_at.slice(0, 19).replace("T", " ") : "—";
   }
 
+  get statVerifiedUsers() {
+    return this.stats?.verified_users ?? "—";
+  }
+
+  get statVerifications() {
+    return this.stats?.verifications ?? "—";
+  }
+
   get libraryOpen() {
     return this.libraryKind !== null;
   }
 
   get libraryTitle() {
     return this.libraryKind ? i18n(`${BASE}.library_${this.libraryKind}`) : "";
+  }
+
+  get librarySearchPlaceholder() {
+    return i18n(
+      this.libraryKind === "verifications"
+        ? `${BASE}.library_search_username`
+        : `${BASE}.library_search_placeholder`
+    );
   }
 
   get libraryColumns() {

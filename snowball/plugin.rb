@@ -60,4 +60,6 @@ Discourse::Application.routes.append do
       :constraints => AdminConstraint.new
   get "/admin/snowball/library/resigned_observations" => "snowball/admin#library_resigned_observations",
       :constraints => AdminConstraint.new
+  get "/admin/snowball/library/verifications" => "snowball/admin#library_verifications",
+      :constraints => AdminConstraint.new
 end

@@ -279,7 +279,9 @@ module SnowballVerifier
     if answer[:resigned]
       SnowballResignedObservation.record_vote!(employee_id)
     elsif answer[:surname].present?
-      SnowballObservation.record_vote!(employee_id, answer[:surname])
+      # Fold Latin answers to upper case so "l" and "L" land in the same vote
+      # bucket (the client does the same; CJK is unaffected by upcase).
+      SnowballObservation.record_vote!(employee_id, answer[:surname].to_s.strip.upcase)
     end
   end
 end

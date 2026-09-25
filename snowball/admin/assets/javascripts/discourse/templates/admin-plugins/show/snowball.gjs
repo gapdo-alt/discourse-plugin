@@ -33,6 +33,8 @@ function cell(row, column) {
       return value ? String(value).slice(0, 19).replace("T", " ") : "—";
     case "weight":
       return Number(value ?? 0).toFixed(3);
+    case "outcome":
+      return i18n(`admin.plugins.snowball.outcome_${value}`);
     default:
       return value === null || value === undefined || value === "" ? "—" : String(value);
   }
@@ -67,6 +69,14 @@ export default RouteTemplate(
           <span class="snowball-admin__stat-label">{{i18n "admin.plugins.snowball.stat_updated"}}</span>
           <strong>{{@controller.statUpdated}}</strong>
         </div>
+        <div class="snowball-admin__stat">
+          <span class="snowball-admin__stat-label">{{i18n "admin.plugins.snowball.stat_verified_users"}}</span>
+          <strong>{{@controller.statVerifiedUsers}}</strong>
+        </div>
+        <div class="snowball-admin__stat">
+          <span class="snowball-admin__stat-label">{{i18n "admin.plugins.snowball.stat_verifications"}}</span>
+          <strong>{{@controller.statVerifications}}</strong>
+        </div>
       </div>
 
       <div class="snowball-admin__library-buttons">
@@ -85,6 +95,11 @@ export default RouteTemplate(
           @action={{fn @controller.openLibrary "resigned_observations"}}
           @translatedLabel={{i18n "admin.plugins.snowball.view_resigned"}}
         />
+        <DButton
+          class="btn-default"
+          @action={{fn @controller.openLibrary "verifications"}}
+          @translatedLabel={{i18n "admin.plugins.snowball.view_verifications"}}
+        />
       </div>
 
       {{#if @controller.libraryOpen}}
@@ -101,7 +116,7 @@ export default RouteTemplate(
               <input
                 type="search"
                 class="snowball-admin__search"
-                placeholder={{i18n "admin.plugins.snowball.library_search_placeholder"}}
+                placeholder={{@controller.librarySearchPlaceholder}}
                 value={{@controller.libraryQuery}}
                 {{on "input" @controller.onLibraryQuery}}
                 {{on "keydown" @controller.onLibraryQueryKeydown}}

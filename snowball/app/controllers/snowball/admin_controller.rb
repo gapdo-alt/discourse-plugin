@@ -11,7 +11,37 @@ module Snowball
 
     # GET /admin/snowball/seeds -- library statistics (never the data itself)
     def seeds
-      render json: SnowballSeedImport.stats
+      render json: SnowballSeedImport.stats.merge(
+               verifications: SnowballVerificationAttempt.count,
+               verified_users: verified_user_count,
+             )
+    end
+
+    # GET /admin/snowball/library/verifications -- who submitted what, newest first
+    def library_verifications
+      scope = SnowballVerificationAttempt.order(created_at: :desc, id: :desc)
+
+      # Usernames are [A-Za-z0-9_.-], so stripping everything else keeps this
+      # filter injection-proof without touching the SQL shape.
+      username = params[:q].to_s.strip.gsub(/[^\w\-.]/, "")
+      if username.present?
+        scope =
+          scope.joins(:user).where("users.username ILIKE ?", "%#{username}%")
+      end
+
+      render_library(scope, employee_id_filter: false) do |attempt|
+        user = attempt.user
+
+        {
+          created_at: attempt.created_at&.iso8601,
+          username: user&.username,
+          user_id: attempt.user_id,
+          outcome: attempt.outcome,
+          passed: attempt.outcome == SnowballVerificationAttempt::PASSED,
+          verified_at: user&.custom_fields&.[]("snowball_verified_at"),
+          expires_at: user ? SnowballPromoter.expires_at(user)&.iso8601 : nil,
+        }
+      end
     end
 
     # GET /admin/snowball/library/seeds -- the seed rows themselves, paginated
@@ -83,12 +113,15 @@ module Snowball
 
     private
 
-    # Shared paging + optional employee-id filter for the three library lists.
-    # The filter is reduced to digits before it reaches SQL, so it can never
-    # change the shape of the statement (and the ids are digits by definition).
-    def render_library(scope)
-      digits = params[:q].to_s.gsub(/\D/, "")
-      scope = scope.where("employee_id LIKE ?", "%#{digits}%") if digits.present?
+    # Shared paging for the library lists.  The employee-id filter is reduced to
+    # digits before it reaches SQL, so it can never change the shape of the
+    # statement (and the ids are digits by definition); callers that filter on
+    # something else apply their own filter and opt out.
+    def render_library(scope, employee_id_filter: true)
+      if employee_id_filter
+        digits = params[:q].to_s.gsub(/\D/, "")
+        scope = scope.where("employee_id LIKE ?", "%#{digits}%") if digits.present?
+      end
 
       page = [params[:page].to_i, 1].max
       per_page = params[:per_page].to_i
@@ -104,6 +137,13 @@ module Snowball
         per_page: per_page,
         items: rows.map { |row| yield row },
       }
+    end
+
+    def verified_user_count
+      UserCustomField
+        .where(name: "snowball_verified_at")
+        .where("value IS NOT NULL AND value <> ''")
+        .count
     end
   end
 end
